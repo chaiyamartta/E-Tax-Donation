@@ -112,8 +112,8 @@
       const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'edonation-chaiyamat';
 
       function App() {
-        const fileInputRef = useRef(null);
-        const [uploadingId, setUploadingId] = useState(null);
+        const [approveInputId, setApproveInputId] = useState(null);
+        const [receiptNoInput, setReceiptNoInput] = useState('');
 
         // ================= State สำหรับระบบ Auth และ Firebase =================
         const [firebaseUser, setFirebaseUser] = useState(null);
@@ -349,31 +349,20 @@
           }
         };
 
-        const triggerApproveUpload = (id) => {
-          setUploadingId(id);
-          fileInputRef.current.click();
-        };
-
-        const handleFileChange = async (e) => {
-          const file = e.target.files[0];
-          if (file && uploadingId) {
-            if (file.type !== 'application/pdf') {
-              showNotification('กรุณาอัปโหลดไฟล์ PDF เท่านั้น', 'error');
-              setUploadingId(null);
-              e.target.value = null; 
-              return;
-            }
-            
-            try {
-              const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'donations', uploadingId);
-              await updateDoc(docRef, { status: 'approved', receiptFileName: file.name });
-              showNotification(`อนุมัติและแนบเอกสาร "${file.name}" สำเร็จ`);
-            } catch (error) {
-              showNotification('เกิดข้อผิดพลาดในการอัปเดตข้อมูล', 'error');
-            } finally {
-              setUploadingId(null);
-              e.target.value = null; 
-            }
+        const confirmApprove = async (id) => {
+          if (!receiptNoInput.trim()) {
+            showNotification('กรุณากรอกเลขที่ใบเสร็จให้ครบถ้วน', 'error');
+            return;
+          }
+          
+          try {
+            const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'donations', id);
+            await updateDoc(docRef, { status: 'approved', receiptNo: receiptNoInput.trim() });
+            showNotification(`อนุมัติและอัปเดตเลขที่ใบเสร็จ "${receiptNoInput}" สำเร็จ`);
+            setApproveInputId(null);
+            setReceiptNoInput('');
+          } catch (error) {
+            showNotification('เกิดข้อผิดพลาดในการอัปเดตข้อมูล', 'error');
           }
         };
 
@@ -440,8 +429,7 @@
           const printDateTime = formatDateTimeThai(new Date());
           const donationDateThai = formatThaiDate(donation.date);
           const bahtText = getThaiBahtText(totalAmount);
-          const randomReceiptNum = Math.floor(Math.random() * 100000).toString().padStart(6, '0');
-          const receiptNo = `0994002406468-${new Date().getFullYear() + 543}-A0${randomReceiptNum}`;
+          const receiptNo = donation.receiptNo || '-';
 
           printWindow.document.write(`
             <html>
@@ -449,8 +437,20 @@
                 <title>ใบเสร็จ e-Donation - ${donorName}</title>
                 <style>
                   @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-                  body { font-family: 'Sarabun', sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.5; background-color: #fff; }
-                  .receipt-container { max-width: 900px; margin: 0 auto; }
+                  body { font-family: 'Sarabun', sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.5; background-color: #fff; margin: 0; }
+                  .receipt-container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; padding: 20px; }
+                  
+                  /* Watermark styling */
+                  .watermark {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 450px;
+                    opacity: 0.08; /* ปรับความจางของลายน้ำที่นี่ */
+                    z-index: -1;
+                    pointer-events: none;
+                  }
                   
                   /* Header & Logos */
                   .header-row-1 { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
@@ -490,12 +490,19 @@
                   
                   @media print {
                     body { padding: 0; }
-                    .receipt-container { max-width: 100%; }
+                    .receipt-container { max-width: 100%; padding: 0; }
+                    .watermark {
+                      -webkit-print-color-adjust: exact;
+                      print-color-adjust: exact;
+                    }
                   }
                 </style>
               </head>
               <body>
                 <div class="receipt-container">
+                  <!-- ภาพลายน้ำตรงกลาง -->
+                  <img src="https://img2.pic.in.th/pic/-Ver.3-1.png" alt="watermark" class="watermark" />
+                  
                   <div class="header-row-1">
                     <div class="logo-container logo-e-shadow">
                       <span class="logo-e">e-</span><span class="logo-text">Donation</span>
@@ -939,7 +946,7 @@
                           }
                         </td>
                         <td className="px-4 py-3 border-r border-slate-200 text-center">
-                          {d.status === 'approved' && d.receiptFileName ? (
+                          {d.status === 'approved' ? (
                             <button onClick={() => handleDownloadReceipt(d)} className="text-sky-600 hover:text-sky-800 text-xs font-medium flex items-center justify-center gap-1 w-full p-1 rounded hover:bg-sky-50 transition-colors">
                               <Download size={14} /> {isDonor ? 'โหลดใบเสร็จ' : 'ดู PDF / พิมพ์'}
                             </button>
@@ -949,12 +956,21 @@
                         </td>
                         {!isDonor && (
                           <td className="px-4 py-3 text-center flex justify-center gap-2">
-                            {d.status === 'pending' && (
-                              <button onClick={() => triggerApproveUpload(d.id)} className="text-green-600 hover:text-green-800 bg-green-50 px-2 py-1 rounded text-xs border border-green-200 flex items-center gap-1">
-                                <UploadCloud size={14} /> อนุมัติ
+                            {d.status === 'pending' && approveInputId !== d.id && (
+                              <button onClick={() => { setApproveInputId(d.id); setReceiptNoInput(''); }} className="text-green-600 hover:text-green-800 bg-green-50 px-2 py-1 rounded text-xs border border-green-200 flex items-center gap-1">
+                                <CheckCircle2 size={14} /> อนุมัติ
                               </button>
                             )}
-                            <button onClick={() => handleDelete(d.id)} className="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><Trash2 size={14}/></button>
+                            {approveInputId === d.id && (
+                              <div className="flex items-center gap-1">
+                                <input type="text" value={receiptNoInput} onChange={(e) => setReceiptNoInput(e.target.value)} placeholder="เลขที่ใบเสร็จ" className="text-xs px-2 py-1 border rounded w-32 outline-none focus:ring-1 focus:ring-green-500" autoFocus />
+                                <button onClick={() => confirmApprove(d.id)} className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">ตกลง</button>
+                                <button onClick={() => setApproveInputId(null)} className="bg-slate-400 text-white px-2 py-1 rounded text-xs hover:bg-slate-500">ยกเลิก</button>
+                              </div>
+                            )}
+                            {approveInputId !== d.id && (
+                              <button onClick={() => handleDelete(d.id)} className="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><Trash2 size={14}/></button>
+                            )}
                           </td>
                         )}
                       </tr>
@@ -1046,14 +1062,6 @@
                 )}
 
                 <div className="pb-20">
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    style={{ display: 'none' }} 
-                    accept=".pdf,application/pdf" 
-                    onChange={handleFileChange} 
-                  />
-
                   {activeMenu === 'instructions' && <RenderInstructions />}
                   {activeMenu === 'record' && <RenderRecordForm />}
                   {activeMenu === 'donor_request' && <RenderRecordForm />}
