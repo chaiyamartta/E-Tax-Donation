@@ -454,15 +454,10 @@
                   
                   /* Header & Logos */
                   .header-row-1 { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
-                  .logo-container { display: flex; align-items: baseline; }
-                  .logo-e { font-size: 40px; font-weight: 700; color: #433385; font-style: italic; letter-spacing: -2px; }
-                  .logo-e-shadow { position: relative; }
-                  .logo-e-shadow::before { content: '• • •'; font-size: 14px; color: #433385; position: absolute; left: -15px; top: 15px; letter-spacing: -1px; transform: rotate(-15deg); }
-                  .logo-text { font-size: 26px; font-weight: 700; color: #666; margin-left: 2px; }
                   .receipt-title { font-size: 32px; font-weight: 700; color: #2e377d; }
                   
                   /* Sub headers */
-                  .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 10px; color: #333; }
+                  .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 10px; color: #333; align-items: flex-end; }
                   .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 25px; }
                   
                   /* Main Grid Content */
@@ -504,9 +499,7 @@
                   <img src="https://img2.pic.in.th/pic/-Ver.3-1.png" alt="watermark" class="watermark" />
                   
                   <div class="header-row-1">
-                    <div class="logo-container logo-e-shadow">
-                      <span class="logo-e">e-</span><span class="logo-text">Donation</span>
-                    </div>
+                    <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 80px; object-fit: contain;" />
                     <div class="receipt-title">ใบรับเงินบริจาค</div>
                   </div>
                   <div class="header-row-2">
@@ -1062,11 +1055,12 @@
                 )}
 
                 <div className="pb-20">
-                  {activeMenu === 'instructions' && <RenderInstructions />}
-                  {activeMenu === 'record' && <RenderRecordForm />}
-                  {activeMenu === 'donor_request' && <RenderRecordForm />}
-                  {activeMenu === 'list' && <RenderList />}
-                  {activeMenu === 'donor_history' && <RenderList />}
+                  {/* เปลี่ยนวิธีเรียกคอมโพเนนต์ด้านล่างเพื่อแก้ปัญหาช่องกรอกข้อมูลเด้งหลุดโฟกัส */}
+                  {activeMenu === 'instructions' && RenderInstructions()}
+                  {activeMenu === 'record' && RenderRecordForm()}
+                  {activeMenu === 'donor_request' && RenderRecordForm()}
+                  {activeMenu === 'list' && RenderList()}
+                  {activeMenu === 'donor_history' && RenderList()}
                   
                   {activeMenu === 'report' && (
                     <div className="space-y-6">
