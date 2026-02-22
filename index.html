@@ -377,55 +377,187 @@
           }
         };
 
+        // ฟังก์ชันช่วยเหลือสำหรับฟอร์แมตใบเสร็จ
+        const formatThaiDate = (dateString) => {
+          if (!dateString) return '';
+          const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+          const d = new Date(dateString);
+          return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+        };
+
+        const formatDateTimeThai = (date) => {
+          const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+          const pad = (n) => n.toString().padStart(2, '0');
+          return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear() + 543} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
+
+        const formatTaxId = (id) => {
+          if (!id || id.length !== 13) return id;
+          return `${id[0]} ${id.substring(1, 5)} ${id.substring(5, 10)} ${id.substring(10, 12)} ${id[12]}`;
+        };
+
+        const getThaiBahtText = (amount) => {
+          const number = Math.round(amount * 100) / 100;
+          if (number === 0) return 'ศูนย์บาทถ้วน';
+          const t1 = ["", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+          const t2 = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
+          let numStr = number.toFixed(2).split('.');
+          let baht = numStr[0];
+          let satang = numStr[1];
+          
+          let result = "";
+          const readPart = (str) => {
+            let res = "";
+            for (let i = 0; i < str.length; i++) {
+              let n = parseInt(str[i]);
+              let pos = str.length - i - 1;
+              if (n !== 0) {
+                if (pos === 0 && n === 1 && str.length > 1 && str[i-1] !== '0') res += "เอ็ด";
+                else if (pos === 1 && n === 1) res += "";
+                else if (pos === 1 && n === 2) res += "ยี่";
+                else res += t1[n];
+                res += t2[pos];
+              }
+            }
+            return res;
+          };
+          
+          if (baht !== "0") result += readPart(baht) + "บาท";
+          if (satang === "00") result += "ถ้วน";
+          else result += readPart(satang) + "สตางค์";
+          return result;
+        };
+
         const handleDownloadReceipt = (donation) => {
-          // เปิดหน้าต่างใหม่เพื่อสร้างแบบฟอร์มใบเสร็จและสั่งพิมพ์
           const printWindow = window.open('', '_blank');
+          
+          // เตรียมข้อมูลสำหรับแสดงผล
           const donorName = donation.donorType === 'individual' 
-            ? `${donation.prefix}${donation.firstName} ${donation.lastName}`
+            ? `${donation.prefix || ''}${donation.firstName} ${donation.lastName}`.trim()
             : donation.corpName;
           const totalAmount = (donation.cashAmount || 0) + (donation.assetValue || 0);
+          const formattedTaxId = formatTaxId(donation.taxId);
+          const printDateTime = formatDateTimeThai(new Date());
+          const donationDateThai = formatThaiDate(donation.date);
+          const bahtText = getThaiBahtText(totalAmount);
+          const randomReceiptNum = Math.floor(Math.random() * 100000).toString().padStart(6, '0');
+          const receiptNo = `0994002406468-${new Date().getFullYear() + 543}-A0${randomReceiptNum}`;
 
           printWindow.document.write(`
             <html>
               <head>
-                <title>ใบอนุโมทนาบัตร - ${donorName}</title>
+                <title>ใบเสร็จ e-Donation - ${donorName}</title>
                 <style>
-                  body { font-family: 'Sarabun', Tahoma, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
-                  .receipt-container { max-width: 800px; margin: 0 auto; border: 1px solid #ddd; padding: 50px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-                  .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #1e3b6d; padding-bottom: 20px; }
-                  .header h1 { color: #1e3b6d; margin: 0 0 10px 0; font-size: 28px; }
-                  .header h2 { color: #555; margin: 0 0 10px 0; font-size: 20px; }
-                  .content p { font-size: 16px; margin: 12px 0; }
-                  .amount { font-size: 24px; font-weight: bold; color: #1e3b6d; text-align: center; margin: 40px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px dashed #ccc; }
-                  .footer { text-align: center; margin-top: 50px; font-size: 14px; color: #888; border-top: 1px solid #eee; padding-top: 20px; }
+                  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+                  body { font-family: 'Sarabun', sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.5; background-color: #fff; }
+                  .receipt-container { max-width: 900px; margin: 0 auto; }
+                  
+                  /* Header & Logos */
+                  .header-row-1 { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
+                  .logo-container { display: flex; align-items: baseline; }
+                  .logo-e { font-size: 40px; font-weight: 700; color: #433385; font-style: italic; letter-spacing: -2px; }
+                  .logo-e-shadow { position: relative; }
+                  .logo-e-shadow::before { content: '• • •'; font-size: 14px; color: #433385; position: absolute; left: -15px; top: 15px; letter-spacing: -1px; transform: rotate(-15deg); }
+                  .logo-text { font-size: 26px; font-weight: 700; color: #666; margin-left: 2px; }
+                  .receipt-title { font-size: 32px; font-weight: 700; color: #2e377d; }
+                  
+                  /* Sub headers */
+                  .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 10px; color: #333; }
+                  .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 25px; }
+                  
+                  /* Main Grid Content */
+                  .content-grid { display: grid; grid-template-columns: 200px 1fr; row-gap: 25px; margin-bottom: 60px; }
+                  .label { font-size: 20px; font-weight: 700; color: #000; padding-top: 2px; text-align: left; }
+                  .details { display: flex; flex-direction: column; }
+                  .val-title { font-size: 20px; font-weight: 700; color: #000; }
+                  .val-sub { font-size: 16px; font-weight: 400; color: #000; margin-top: 6px; }
+                  .val-sub strong { font-weight: 700; }
+                  
+                  /* Signatures Footer */
+                  .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; margin-top: 80px; align-items: end; }
+                  .sig-left { text-align: left; font-size: 12px; color: #333; }
+                  .sig-center { text-align: center; }
+                  .sig-name { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 5px; }
+                  .sig-role { font-size: 18px; font-weight: 700; color: #000; }
+                  .sig-right { text-align: right; }
+                  .sig-date-title { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 5px; }
+                  .sig-print-date { font-size: 16px; font-weight: 700; color: #000; }
+                  
+                  /* Notes */
+                  .notes { margin-top: 20px; font-size: 12px; color: #333; line-height: 1.6; }
+                  .notes-flex { display: flex; }
+                  .notes-label { white-space: nowrap; margin-right: 5px; }
+                  
                   @media print {
-                    body { padding: 0; background: white; }
-                    .receipt-container { border: none; padding: 20px; box-shadow: none; max-width: 100%; }
+                    body { padding: 0; }
+                    .receipt-container { max-width: 100%; }
                   }
                 </style>
               </head>
               <body>
                 <div class="receipt-container">
-                  <div class="header">
-                    <h1>ใบอนุโมทนาบัตร / ใบเสร็จรับเงิน</h1>
-                    <h2>วัดไชยามาตย์</h2>
-                    <p>เอกสารประกอบการลดหย่อนภาษี (e-Donation)</p>
+                  <div class="header-row-1">
+                    <div class="logo-container logo-e-shadow">
+                      <span class="logo-e">e-</span><span class="logo-text">Donation</span>
+                    </div>
+                    <div class="receipt-title">ใบรับเงินบริจาค</div>
                   </div>
-                  <div class="content">
-                    <p><strong>วันที่ได้รับเงินบริจาค:</strong> ${donation.date.split('-').reverse().join('/')}</p>
-                    <p><strong>ได้รับเงินจาก:</strong> ${donorName}</p>
-                    <p><strong>เลขประจำตัวผู้เสียภาษีอากร:</strong> ${donation.taxId}</p>
-                    ${donation.cashAmount > 0 ? `<p><strong>จำนวนเงินสด:</strong> ${donation.cashAmount.toLocaleString()} บาท</p>` : ''}
-                    ${donation.assetValue > 0 ? `<p><strong>รายการทรัพย์สิน:</strong> ${donation.assetName} (มูลค่า ${donation.assetValue.toLocaleString()} บาท)</p>` : ''}
-                    <p><strong>วัตถุประสงค์การบริจาค:</strong> ${donation.note || '-'}</p>
+                  <div class="header-row-2">
+                    <div>ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
+                    <div><strong>เลขที่</strong> ${receiptNo}</div>
+                  </div>
+                  
+                  <div class="divider"></div>
+                  
+                  <div class="content-grid">
+                    <div class="label">ผู้บริจาค</div>
+                    <div class="details">
+                      <div class="val-title">${donorName}</div>
+                      <div class="val-sub">เลขประจำตัวประชาชน / เลขประจำตัวผู้เสียภาษีอากร <strong>${formattedTaxId}</strong></div>
+                    </div>
                     
-                    <div class="amount">
-                      รวมมูลค่าเงินบริจาคทั้งสิ้น ${totalAmount.toLocaleString()} บาท
+                    <div class="label">หน่วยรับบริจาค</div>
+                    <div class="details">
+                      <div class="val-title">วัดไชยามาตย์</div>
+                      <div class="val-sub">ตำบล/แขวง เวียงทอง อำเภอ/เขต สูงเม่น จังหวัด แพร่</div>
+                      <div class="val-sub">เลขประจำตัวหน่วยรับบริจาค <strong>0 9940 02406 46 8</strong></div>
+                    </div>
+                    
+                    <div class="label">วันที่บริจาค</div>
+                    <div class="details">
+                      <div class="val-title">${donationDateThai}</div>
+                    </div>
+                    
+                    <div class="label">จำนวนเงินบริจาค</div>
+                    <div class="details">
+                      <div class="val-title">${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท</div>
+                      <div class="val-sub">( ${bahtText} )</div>
                     </div>
                   </div>
-                  <div class="footer">
-                    <p>เอกสารฉบับนี้สร้างจากระบบคอมพิวเตอร์เพื่อใช้เป็นหลักฐานการบริจาคผ่านระบบ e-Donation</p>
-                    <p>ชื่อไฟล์อ้างอิง: ${donation.receiptFileName}</p>
+                  
+                  <div class="signatures">
+                    <div class="sig-left">
+                      DN: 12e82105
+                    </div>
+                    <div class="sig-center">
+                      <div class="sig-name">พระครู วิจารณ์ธรรมภิวัฒน์ (อนันต์ เวียงโอสถ)</div>
+                      <div class="sig-role">ผู้มีอำนาจลงนาม</div>
+                    </div>
+                    <div class="sig-right">
+                      <div class="sig-date-title">วันเดือนปีที่ขอพิมพ์</div>
+                      <div class="sig-print-date">${printDateTime}</div>
+                    </div>
+                  </div>
+                  
+                  <div class="notes">
+                    <div class="notes-flex">
+                      <div class="notes-label">หมายเหตุ : </div>
+                      <div>
+                        1. ข้อมูลบริจาคของท่านได้บันทึกไว้ในระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) ท่านสามารถตรวจสอบได้ที่เว็บไซต์กรมสรรพากร (www.rd.go.th)<br>
+                        2. กรมสรรพากรเป็นเพียงผู้ให้บริการระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรณีที่ท่านต้องการแก้ไข หรือยกเลิกหรือสอบถามเกี่ยวกับรายการบริจาค<br>
+                        &nbsp;&nbsp;&nbsp;ของท่านสามารถสอบถามได้ที่หน่วยรับบริจาคที่ท่านทำรายการ
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <script>
