@@ -55,7 +55,26 @@
     body { 
       background-color: #f8fafc;
       color: #334155;
+      position: relative;
     }
+
+    /* ตั้งค่าภาพพื้นหลังเว็บไซต์ */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('https://img2.pic.in.th/IMG_2659.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.15; /* ความจางของพื้นหลัง */
+      z-index: -50;
+      pointer-events: none;
+    }
+
     .animate-fade-in { 
       animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
     }
@@ -64,6 +83,23 @@
       to { opacity: 1; transform: translateY(0); } 
     }
     
+    /* Animation สำหรับ Alert แบบใหม่ */
+    @keyframes slideInRight {
+      from { transform: translateX(100%) scale(0.9); opacity: 0; }
+      to { transform: translateX(0) scale(1); opacity: 1; }
+    }
+    .animate-slide-in-right {
+      animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes shrinkProgress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    .animate-progress {
+      animation: shrinkProgress 3s linear forwards;
+    }
+
     /* ตั้งค่าฟอนต์ให้ SweetAlert2 */
     .swal2-popup {
       font-family: 'Prompt', 'Sarabun', sans-serif !important;
@@ -187,7 +223,7 @@
         const [users, setUsers] = useState([]);
         const [donations, setDonations] = useState([]);
 
-        // ================= 초기化 Firebase & Fetch Data =================
+        // ================= 초기화 Firebase & Fetch Data =================
         useEffect(() => {
           // 1. ตรวจสอบสิทธิ์ Firebase โดยใช้ Token ของระบบ (ถ้ามี) หรือ Anonymous Auth
           const initAuth = async () => {
@@ -523,8 +559,15 @@
                 <title>ใบเสร็จ e-Donation - ${donorName}</title>
                 <style>
                   @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-                  body { font-family: 'Sarabun', sans-serif; padding: 40px; color: #1a1a1a; line-height: 1.5; background-color: #fff; margin: 0; }
-                  .receipt-container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; padding: 20px; }
+                  
+                  /* การตั้งค่าหน้ากระดาษ A5 แนวนอน (Landscape) */
+                  @page {
+                    size: A5 landscape;
+                    margin: 10mm;
+                  }
+
+                  body { font-family: 'Sarabun', sans-serif; padding: 20px; color: #1a1a1a; line-height: 1.4; background-color: #fff; margin: 0; }
+                  .receipt-container { max-width: 100%; margin: 0; position: relative; z-index: 1; padding: 0; }
                   
                   /* Watermark styling */
                   .watermark {
@@ -532,7 +575,7 @@
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    width: 450px;
+                    width: 350px;
                     opacity: 0.08;
                     z-index: -1;
                     pointer-events: none;
@@ -540,22 +583,22 @@
                   
                   /* Header & Logos */
                   .header-row-1 { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
-                  .receipt-title { font-size: 32px; font-weight: 700; color: #2e377d; margin-bottom: 8px; }
+                  .receipt-title { font-size: 28px; font-weight: 700; color: #2e377d; margin-bottom: 6px; }
                   
                   /* Sub headers */
-                  .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 15px; color: #333; align-items: flex-end; }
-                  .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 25px; }
+                  .header-row-2 { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 10px; color: #333; align-items: flex-end; }
+                  .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 15px; }
                   
                   /* Stamp Styling */
                   .stamp {
                     position: absolute;
-                    top: 155px; /* ปรับให้อยู่ใต้เส้น divider มุมขวา */
-                    right: 40px;
-                    font-size: 26px;
+                    top: 130px; /* ปรับให้อยู่ใต้เส้น divider มุมขวาพอดี */
+                    right: 20px;
+                    font-size: 20px;
                     font-weight: 700;
-                    padding: 6px 20px;
-                    border: 4px solid;
-                    border-radius: 8px;
+                    padding: 4px 16px;
+                    border: 3px solid;
+                    border-radius: 6px;
                     transform: rotate(-10deg);
                     opacity: 0.7;
                     pointer-events: none;
@@ -565,26 +608,26 @@
                   .stamp-original { color: #2e377d; border-color: #2e377d; }
                   .stamp-copy { color: #dc2626; border-color: #dc2626; }
                   
-                  /* Main Grid Content */
-                  .content-grid { display: grid; grid-template-columns: 200px 1fr; row-gap: 25px; margin-bottom: 60px; }
-                  .label { font-size: 20px; font-weight: 700; color: #000; padding-top: 2px; text-align: left; }
+                  /* Main Grid Content - ปรับลดช่องว่างเพื่อไม่ให้ล้นหน้า A5 */
+                  .content-grid { display: grid; grid-template-columns: 180px 1fr; row-gap: 12px; margin-bottom: 30px; }
+                  .label { font-size: 18px; font-weight: 700; color: #000; padding-top: 2px; text-align: left; }
                   .details { display: flex; flex-direction: column; }
-                  .val-title { font-size: 20px; font-weight: 700; color: #000; }
-                  .val-sub { font-size: 16px; font-weight: 400; color: #000; margin-top: 6px; }
+                  .val-title { font-size: 18px; font-weight: 700; color: #000; }
+                  .val-sub { font-size: 15px; font-weight: 400; color: #000; margin-top: 4px; }
                   .val-sub strong { font-weight: 700; }
                   
                   /* Signatures Footer */
-                  .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; margin-top: 80px; align-items: end; }
+                  .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; margin-top: 30px; align-items: end; }
                   .sig-left { text-align: left; font-size: 12px; color: #333; }
                   .sig-center { text-align: center; }
-                  .sig-name { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 5px; }
-                  .sig-role { font-size: 18px; font-weight: 700; color: #000; }
+                  .sig-name { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 4px; }
+                  .sig-role { font-size: 16px; font-weight: 700; color: #000; }
                   .sig-right { text-align: right; }
-                  .sig-date-title { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 5px; }
-                  .sig-print-date { font-size: 16px; font-weight: 700; color: #000; }
+                  .sig-date-title { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 4px; }
+                  .sig-print-date { font-size: 14px; font-weight: 700; color: #000; }
                   
                   /* Notes */
-                  .notes { margin-top: 20px; font-size: 12px; color: #333; line-height: 1.6; }
+                  .notes { margin-top: 20px; font-size: 11px; color: #333; line-height: 1.5; }
                   .notes-flex { display: flex; }
                   .notes-label { white-space: nowrap; margin-right: 5px; }
                   
@@ -606,18 +649,18 @@
                   <!-- ตรายางประทับ ต้นฉบับ/สำเนา -->
                   <div class="stamp ${stampClass}">${printStatusText}</div>
                   
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                     <!-- โลโก้และข้อความฝั่งซ้าย -->
                     <div style="display: flex; flex-direction: column; justify-content: space-between;">
-                      <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 80px; object-fit: contain; object-position: left top;" />
-                      <div style="font-size: 16px; color: #333; margin-top: 25px;">ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
+                      <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 70px; object-fit: contain; object-position: left top;" />
+                      <div style="font-size: 15px; color: #333; margin-top: 15px;">ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
                     </div>
                     
                     <!-- ส่วนหัวฝั่งขวา (ใบรับเงิน, เลขที่, Barcode) -->
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                      <div class="receipt-title" style="margin-bottom: 10px;">ใบรับเงินบริจาค</div>
-                      <div style="font-size: 16px; color: #333; margin-bottom: 8px;"><strong>เลขที่</strong> ${receiptNo}</div>
-                      ${receiptNo !== '-' ? `<img src="${barcodeUrl}" alt="Barcode" style="height: 35px; max-width: 250px; object-fit: contain;" />` : ''}
+                      <div class="receipt-title">ใบรับเงินบริจาค</div>
+                      <div style="font-size: 15px; color: #333; margin-bottom: 6px;"><strong>เลขที่</strong> ${receiptNo}</div>
+                      ${receiptNo !== '-' ? `<img src="${barcodeUrl}" alt="Barcode" style="height: 30px; max-width: 220px; object-fit: contain;" />` : ''}
                     </div>
                   </div>
                   
@@ -753,12 +796,7 @@
         // ================= ส่วนประกอบ UI: ระบบ Login/Register =================
         if (!currentUser) {
           return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-brand-50 via-slate-100 to-brand-100 relative overflow-hidden">
-
-              {/* พื้นหลังตกแต่ง */}
-              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-400/20 rounded-full blur-3xl pointer-events-none"></div>
-              <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
-
+            <div className="min-h-screen flex items-center justify-center p-4 bg-transparent relative overflow-hidden">
               <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-[900px] overflow-hidden flex flex-col md:flex-row relative z-10 animate-fade-in border border-white/50">
                 
                 {/* แจ้งเตือนสถานะการเชื่อมต่อ Database */}
@@ -787,7 +825,6 @@
                 
                 {/* ฝั่งขวา: ฟอร์ม */}
                 <div className="md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-white relative">
-
                   {authMode === 'login' ? (
                     <form onSubmit={handleLogin} className="space-y-5 animate-fade-in mt-4">
                       <div className="text-center mb-8">
@@ -875,7 +912,7 @@
         // ================= ส่วนประกอบ UI: ระบบหลัง Login =================
 
         const RenderInstructions = () => (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-4xl mx-auto animate-fade-in">
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-white p-8 max-w-4xl mx-auto animate-fade-in">
             <h2 className="text-2xl font-heading font-bold text-brand-900 mb-6 border-b border-slate-100 pb-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-brand-100 text-brand-600 rounded-xl flex items-center justify-center"><Info size={24} /></div>
               คำชี้แจงระบบ E-Donation
@@ -950,7 +987,7 @@
           const isDonor = currentUser.role === 'donor';
           
           return (
-            <div className="max-w-4xl mx-auto bg-white border border-slate-100 rounded-2xl p-6 sm:p-10 shadow-sm animate-fade-in">
+            <div className="max-w-4xl mx-auto bg-white/95 backdrop-blur-md border border-white rounded-2xl p-6 sm:p-10 shadow-md animate-fade-in">
               <h2 className="text-2xl font-heading font-bold text-brand-900 mb-8 flex items-center gap-3 border-b border-slate-100 pb-4">
                 <div className="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center">
                   {isDonor ? <FileText size={22} /> : <CheckCircle2 size={22} />}
@@ -1081,8 +1118,8 @@
             : donations.filter(d => (d.firstName + d.lastName + d.corpName).toLowerCase().includes(searchTerm.toLowerCase()) || (d.taxId && d.taxId.includes(searchTerm)));
 
           return (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in flex flex-col h-full">
-              <div className="p-5 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-white overflow-hidden animate-fade-in flex flex-col h-full">
+              <div className="p-5 border-b border-slate-100 bg-white/50 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <h2 className="text-xl font-heading font-bold text-brand-900 flex items-center gap-2">
                   <div className="w-8 h-8 bg-brand-50 text-brand-600 rounded-lg flex items-center justify-center"><Clock size={18}/></div>
                   {isDonor ? 'ประวัติการขอลดหย่อนภาษี' : 'รายการรอตรวจสอบ (Admin)'}
@@ -1095,7 +1132,7 @@
                           <Search size={18} />
                         </span>
                         <input type="text" placeholder="ค้นหาชื่อ, เลขผู้เสียภาษี..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} 
-                          className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none transition-all" />
+                          className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none transition-all shadow-sm" />
                       </div>
                       <button onClick={exportToCSV} className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white px-4 py-2 rounded-xl text-sm font-heading font-medium transition-colors shadow-sm">
                         <Download size={18} /> ส่งออก CSV
@@ -1106,7 +1143,7 @@
               </div>
               <div className="overflow-x-auto flex-1 custom-scrollbar">
                 <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-slate-50 text-slate-600 font-heading border-y border-slate-200 sticky top-0 z-10">
+                  <thead className="bg-slate-50/80 text-slate-600 font-heading border-y border-slate-200 sticky top-0 z-10 backdrop-blur-sm">
                     <tr>
                       <th className="px-5 py-4 font-semibold text-center w-24">วันที่</th>
                       {!isDonor && <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">เลขประจำตัว</th>}
@@ -1117,9 +1154,9 @@
                       {!isDonor && <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">จัดการ</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 bg-white/50">
                     {displayDonations.map((d) => (
-                      <tr key={d.id} className="hover:bg-brand-50/30 transition-colors group">
+                      <tr key={d.id} className="hover:bg-brand-50/50 transition-colors group">
                         <td className="px-5 py-3 text-center text-slate-500">{d.date.split('-').reverse().join('/')}</td>
                         {!isDonor && <td className="px-5 py-3 text-center font-mono text-slate-600 tracking-wider text-[13px]">{d.taxId}</td>}
                         <td className="px-5 py-3 font-medium text-slate-800">
@@ -1154,19 +1191,19 @@
                         {!isDonor && (
                           <td className="px-5 py-3 text-center flex justify-center gap-2 items-center relative">
                             {(d.status === 'pending' || (d.status === 'approved' && !d.receiptNo)) && approveInputId !== d.id && (
-                              <button onClick={() => { setApproveInputId(d.id); setReceiptNoInput(d.receiptNo || ''); }} className="text-green-700 hover:text-white bg-green-50 hover:bg-green-600 p-1.5 rounded-lg border border-green-200 transition-colors tooltip" title={d.status === 'pending' ? 'อนุมัติรายการ' : 'เพิ่มเลขใบเสร็จ'}>
+                              <button onClick={() => { setApproveInputId(d.id); setReceiptNoInput(d.receiptNo || ''); }} className="text-green-700 hover:text-white bg-green-50 hover:bg-green-600 p-1.5 rounded-lg border border-green-200 transition-colors tooltip shadow-sm" title={d.status === 'pending' ? 'อนุมัติรายการ' : 'เพิ่มเลขใบเสร็จ'}>
                                 <CheckCircle2 size={18} />
                               </button>
                             )}
                             {approveInputId === d.id && (
-                              <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm absolute right-10 z-20">
-                                <input type="text" value={receiptNoInput} onChange={(e) => setReceiptNoInput(e.target.value)} placeholder="เลขที่ใบเสร็จ e-Donation" className="text-xs px-2 py-1.5 border border-slate-200 rounded-md w-36 outline-none focus:ring-1 focus:ring-brand-500 font-mono" autoFocus />
-                                <button onClick={() => confirmApprove(d.id)} className="bg-green-600 text-white px-2 py-1.5 rounded-md text-xs hover:bg-green-700 font-heading">บันทึก</button>
-                                <button onClick={() => setApproveInputId(null)} className="bg-slate-200 text-slate-600 px-2 py-1.5 rounded-md text-xs hover:bg-slate-300 font-heading">ยกเลิก</button>
+                              <div className="flex items-center gap-1 bg-white p-1.5 rounded-xl border border-slate-200 shadow-lg absolute right-10 z-20">
+                                <input type="text" value={receiptNoInput} onChange={(e) => setReceiptNoInput(e.target.value)} placeholder="เลขที่ใบเสร็จ e-Donation" className="text-xs px-3 py-2 border border-slate-200 rounded-lg w-40 outline-none focus:ring-2 focus:ring-brand-500/30 font-mono" autoFocus />
+                                <button onClick={() => confirmApprove(d.id)} className="bg-green-600 text-white px-3 py-2 rounded-lg text-xs hover:bg-green-700 font-heading font-medium">บันทึก</button>
+                                <button onClick={() => setApproveInputId(null)} className="bg-slate-100 text-slate-600 px-3 py-2 rounded-lg text-xs hover:bg-slate-200 font-heading font-medium border border-slate-200">ยกเลิก</button>
                               </div>
                             )}
                             {approveInputId !== d.id && (
-                              <button onClick={() => handleDelete(d.id)} className="text-red-500 hover:text-white bg-red-50 hover:bg-red-500 p-1.5 rounded-lg border border-red-200 transition-colors opacity-50 group-hover:opacity-100" title="ลบรายการ">
+                              <button onClick={() => handleDelete(d.id)} className="text-red-500 hover:text-white bg-red-50 hover:bg-red-500 p-1.5 rounded-lg border border-red-200 transition-colors opacity-50 group-hover:opacity-100 shadow-sm" title="ลบรายการ">
                                 <Trash2 size={18}/>
                               </button>
                             )}
@@ -1207,12 +1244,12 @@
         const menuItems = currentUser.role === 'admin' ? adminMenus : donorMenus;
 
         return (
-          <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
+          <div className="flex h-screen bg-transparent font-sans overflow-hidden">
             
             {/* Sidebar Modernized */}
-            <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-30 w-72 h-full bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ease-in-out shadow-xl md:shadow-none`}>
+            <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-30 w-72 h-full bg-white/95 backdrop-blur-md border-r border-slate-200/50 flex flex-col transition-transform duration-300 ease-in-out shadow-xl md:shadow-none`}>
               {/* Header Sidebar */}
-              <div className="py-6 px-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+              <div className="py-6 px-6 border-b border-slate-100/50 flex justify-between items-center sticky top-0 z-10">
                 <div className="flex items-center gap-3">
                   <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" className="h-8 w-auto object-contain" alt="Logo"/>
                 </div>
@@ -1243,7 +1280,7 @@
                       className={`w-[calc(100%-2rem)] mx-4 my-1 px-4 py-3 rounded-xl text-[15px] transition-all duration-200 flex items-center gap-3 font-heading ${
                         isActive 
                           ? 'bg-brand-900 text-white font-semibold shadow-md shadow-brand-900/20' 
-                          : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-brand-900'
+                          : 'text-slate-600 font-medium hover:bg-slate-100/50 hover:text-brand-900'
                       }`}
                     >
                       <span className={isActive ? 'text-brand-200' : 'text-slate-400'}>{menu.icon}</span> 
@@ -1253,27 +1290,25 @@
                 })}
               </div>
 
-              <div className="p-4 border-t border-slate-100">
-                <button onClick={handleLogout} className="w-full text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700 py-3 rounded-xl font-heading font-semibold transition-colors flex items-center justify-center gap-2 border border-red-100">
+              <div className="p-4 border-t border-slate-100/50">
+                <button onClick={handleLogout} className="w-full text-red-600 bg-red-50/50 hover:bg-red-100 hover:text-red-700 py-3 rounded-xl font-heading font-semibold transition-colors flex items-center justify-center gap-2 border border-red-100">
                   <LogOut size={18} /> ออกจากระบบ
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col h-screen relative overflow-hidden">
+            <div className="flex-1 flex flex-col h-screen relative overflow-hidden bg-transparent">
               {/* Mobile Header */}
-              <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 flex items-center justify-between shadow-sm md:hidden sticky top-0 z-20">
+              <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 p-4 flex items-center justify-between shadow-sm md:hidden sticky top-0 z-20">
                 <div className="flex items-center gap-3">
                   <button onClick={() => setIsSidebarOpen(true)} className="text-brand-900 bg-brand-50 p-2 rounded-lg"><Menu size={24} /></button>
                   <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" className="h-6 w-auto" alt="Logo"/>
                 </div>
               </header>
 
-              <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-50 custom-scrollbar relative">
-                {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-100/40 rounded-full blur-[100px] pointer-events-none -z-10"></div>
-
-                <div className="pb-10 max-w-7xl mx-auto h-full">
+              <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-transparent custom-scrollbar relative">
+                
+                <div className="pb-10 max-w-7xl mx-auto h-full relative z-10">
                   {activeMenu === 'instructions' && RenderInstructions()}
                   {activeMenu === 'record' && RenderRecordForm()}
                   {activeMenu === 'donor_request' && RenderRecordForm()}
@@ -1282,26 +1317,26 @@
                   
                   {activeMenu === 'report' && (
                     <div className="space-y-6 animate-fade-in">
-                      <h2 className="text-2xl font-heading font-bold text-brand-900 flex items-center gap-3">
+                      <h2 className="text-2xl font-heading font-bold text-brand-900 flex items-center gap-3 bg-white/80 backdrop-blur-sm p-4 rounded-2xl shadow-sm inline-flex border border-white">
                         <div className="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center"><BarChart3 size={24}/></div> 
                         รายงานสรุปยอดเงินบริจาค
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-md border border-white p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-lg transition-all transform hover:-translate-y-1">
                           <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
-                          <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"><CheckCircle2 size={28} /></div>
+                          <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-inner"><CheckCircle2 size={28} /></div>
                           <p className="text-slate-500 font-heading font-medium text-sm">รายการที่อนุมัติแล้ว</p>
                           <p className="text-4xl font-bold text-slate-800 mt-2">{donations.filter(d => d.status === 'approved').length} <span className="text-base font-normal text-slate-400">รายการ</span></p>
                         </div>
-                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-md border border-white p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-lg transition-all transform hover:-translate-y-1">
                           <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
-                          <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"><PieChart size={28} /></div>
+                          <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-inner"><PieChart size={28} /></div>
                           <p className="text-slate-500 font-heading font-medium text-sm">ยอดเงินสดรวมที่อนุมัติ</p>
                           <p className="text-4xl font-bold text-emerald-600 mt-2">{donations.filter(d => d.status === 'approved').reduce((sum, d) => sum + (d.cashAmount || 0), 0).toLocaleString()} <span className="text-base font-normal text-slate-400">บาท</span></p>
                         </div>
-                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-md border border-white p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-lg transition-all transform hover:-translate-y-1">
                           <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
-                          <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"><FileText size={28} /></div>
+                          <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-inner"><FileText size={28} /></div>
                           <p className="text-slate-500 font-heading font-medium text-sm">ยอดมูลค่าทรัพย์สินรวม</p>
                           <p className="text-4xl font-bold text-amber-600 mt-2">{donations.filter(d => d.status === 'approved').reduce((sum, d) => sum + (d.assetValue || 0), 0).toLocaleString()} <span className="text-base font-normal text-slate-400">บาท</span></p>
                         </div>
@@ -1310,8 +1345,8 @@
                   )}
                   
                   {activeMenu === 'manageUsers' && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in">
-                      <div className="p-5 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-white overflow-hidden animate-fade-in">
+                      <div className="p-5 border-b border-slate-100 bg-white/50 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <h2 className="text-xl font-heading font-bold text-brand-900 flex items-center gap-3">
                            <div className="w-8 h-8 bg-brand-50 text-brand-600 rounded-lg flex items-center justify-center"><Users size={18}/></div>
                            จัดการผู้ใช้งานระบบ
@@ -1323,7 +1358,7 @@
                       </div>
 
                       {showAddUserForm && (
-                        <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                        <div className="p-6 border-b border-slate-100 bg-slate-50/80">
                           <form onSubmit={handleAddUserSubmit} className="max-w-4xl bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
                             <h3 className="font-heading font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">ฟอร์มเพิ่มผู้ใช้งาน</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1352,7 +1387,7 @@
                               </div>
                             </div>
                             <div className="pt-4 flex justify-end">
-                              <button type="submit" className="bg-emerald-600 text-white px-8 py-2.5 rounded-xl font-heading font-medium hover:bg-emerald-700 transition shadow-sm hover:shadow-md hover:-translate-y-0.5">บันทึกผู้ใช้งาน</button>
+                              <button type="submit" className="bg-emerald-600 text-white px-8 py-2.5 rounded-xl font-heading font-medium hover:bg-emerald-700 transition shadow-md hover:shadow-lg hover:-translate-y-0.5">บันทึกผู้ใช้งาน</button>
                             </div>
                           </form>
                         </div>
@@ -1360,7 +1395,7 @@
 
                       <div className="overflow-x-auto custom-scrollbar">
                         <table className="w-full text-left text-sm whitespace-nowrap">
-                          <thead className="bg-slate-50 text-slate-600 font-heading border-y border-slate-200">
+                          <thead className="bg-slate-50/80 text-slate-600 font-heading border-y border-slate-200 backdrop-blur-sm">
                             <tr>
                               <th className="px-5 py-4 font-semibold w-1/4">ชื่อ-นามสกุล</th>
                               <th className="px-5 py-4 font-semibold border-l border-slate-200">ชื่อผู้ใช้งาน</th>
@@ -1369,20 +1404,20 @@
                               <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">จัดการ</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody className="divide-y divide-slate-100 bg-white/50">
                             {users.map((u) => (
-                              <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                              <tr key={u.id} className="hover:bg-brand-50/50 transition-colors">
                                 <td className="px-5 py-3 font-medium text-slate-800">{u.name}</td>
                                 <td className="px-5 py-3 text-slate-500">{u.username}</td>
                                 <td className="px-5 py-3">
                                   {u.role === 'admin' 
-                                    ? <span className="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md text-[12px] font-heading font-medium border border-purple-200">เจ้าหน้าที่ (Admin)</span>
-                                    : <span className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md text-[12px] font-heading font-medium border border-blue-200">ผู้บริจาค (Donor)</span>
+                                    ? <span className="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md text-[12px] font-heading font-medium border border-purple-200 shadow-sm">เจ้าหน้าที่ (Admin)</span>
+                                    : <span className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md text-[12px] font-heading font-medium border border-blue-200 shadow-sm">ผู้บริจาค (Donor)</span>
                                   }
                                 </td>
                                 <td className="px-5 py-3 text-center font-mono text-slate-500 tracking-wider text-[13px]">{u.taxId || '-'}</td>
                                 <td className="px-5 py-3 text-center">
-                                  <button onClick={() => showNotification(`ระงับการใช้งาน ${u.name} แล้ว`, 'error')} className="text-red-500 hover:text-white bg-red-50 hover:bg-red-500 px-3 py-1.5 rounded-lg text-xs font-heading font-medium border border-red-200 transition-colors">ระงับผู้ใช้</button>
+                                  <button onClick={() => showNotification(`ระงับการใช้งาน ${u.name} แล้ว`, 'error')} className="text-red-500 hover:text-white bg-red-50 hover:bg-red-500 px-3 py-1.5 rounded-lg text-xs font-heading font-medium border border-red-200 transition-colors shadow-sm">ระงับผู้ใช้</button>
                                 </td>
                               </tr>
                             ))}
