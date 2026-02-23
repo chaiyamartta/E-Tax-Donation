@@ -60,6 +60,24 @@
       from { opacity: 0; transform: translateY(10px); } 
       to { opacity: 1; transform: translateY(0); } 
     }
+    
+    /* Animation สำหรับ Alert แบบใหม่ */
+    @keyframes slideInRight {
+      from { transform: translateX(100%) scale(0.9); opacity: 0; }
+      to { transform: translateX(0) scale(1); opacity: 1; }
+    }
+    .animate-slide-in-right {
+      animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes shrinkProgress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    .animate-progress {
+      animation: shrinkProgress 3s linear forwards;
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -168,8 +186,11 @@
         // State สำหรับจัดการหน้าจอและเมนู
         const [activeMenu, setActiveMenu] = useState('');
         const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-        const [notification, setNotification] = useState(null);
         const [searchTerm, setSearchTerm] = useState('');
+        
+        // State แจ้งเตือนแบบใหม่ (Toast Notification)
+        const [notification, setNotification] = useState(null);
+        const notificationTimeoutRef = useRef(null);
         
         // State สำหรับเพิ่มผู้ใช้งานใหม่
         const [showAddUserForm, setShowAddUserForm] = useState(false);
@@ -249,10 +270,19 @@
         const [formData, setFormData] = useState(initialFormState);
         const [authForm, setAuthForm] = useState({ username: '', password: '', name: '', taxId: '' });
 
-        // ================= ฟังก์ชันช่วยเหลือ =================
+        // ================= ฟังก์ชันช่วยเหลือ (Alert แบบใหม่) =================
         const showNotification = (message, type = 'success') => {
-          setNotification({ message, type });
-          setTimeout(() => setNotification(null), 3000);
+          // เคลียร์ Timeout เดิมถ้ามีการเรียกซ้ำ
+          if (notificationTimeoutRef.current) {
+            clearTimeout(notificationTimeoutRef.current);
+          }
+          
+          setNotification({ message, type, id: Date.now() }); // ใส่ id เพื่อให้ React render แอนิเมชันใหม่ทุกครั้ง
+          
+          // ตั้งเวลาปิดอัตโนมัติ
+          notificationTimeoutRef.current = setTimeout(() => {
+            setNotification(null);
+          }, 3000);
         };
 
         const handleInputChange = (e) => {
@@ -719,6 +749,31 @@
           return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-brand-50 via-slate-100 to-brand-100 relative overflow-hidden">
               
+              {/* Floating Toast Notification สำหรับหน้า Login */}
+              {notification && (
+                <div key={notification.id} className="fixed top-6 right-6 z-[100] animate-slide-in-right">
+                  <div className={`min-w-[320px] overflow-hidden rounded-2xl shadow-2xl border bg-white/95 backdrop-blur-md flex flex-col ${notification.type === 'error' ? 'border-red-200' : 'border-green-200'}`}>
+                    <div className="flex items-center gap-4 p-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${notification.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                        {notification.type === 'error' ? <AlertCircle size={24} /> : <CheckCircle2 size={24} />}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className={`font-heading font-bold ${notification.type === 'error' ? 'text-red-700' : 'text-green-700'}`}>
+                          {notification.type === 'error' ? 'เกิดข้อผิดพลาด' : 'สำเร็จ'}
+                        </h4>
+                        <p className="text-slate-600 text-sm mt-0.5 font-medium">{notification.message}</p>
+                      </div>
+                      <button onClick={() => setNotification(null)} className="text-slate-400 hover:text-slate-600 transition-colors p-1">
+                        <X size={20} />
+                      </button>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-100">
+                      <div className={`h-full animate-progress ${notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* พื้นหลังตกแต่ง */}
               <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-400/20 rounded-full blur-3xl pointer-events-none"></div>
               <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -751,13 +806,6 @@
                 
                 {/* ฝั่งขวา: ฟอร์ม */}
                 <div className="md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-white relative">
-                  
-                  {notification && (
-                    <div className={`absolute top-4 right-4 left-4 p-3 rounded-xl flex items-center gap-3 text-sm font-medium shadow-md animate-fade-in z-20 ${notification.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
-                      {notification.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
-                      {notification.message}
-                    </div>
-                  )}
 
                   {authMode === 'login' ? (
                     <form onSubmit={handleLogin} className="space-y-5 animate-fade-in mt-4">
@@ -1170,6 +1218,31 @@
         return (
           <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
             
+            {/* Floating Toast Notification สำหรับระบบหลัง Login */}
+            {notification && (
+              <div key={notification.id} className="fixed top-6 right-6 z-[100] animate-slide-in-right">
+                <div className={`min-w-[320px] overflow-hidden rounded-2xl shadow-2xl border bg-white/95 backdrop-blur-md flex flex-col ${notification.type === 'error' ? 'border-red-200' : 'border-green-200'}`}>
+                  <div className="flex items-center gap-4 p-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${notification.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                      {notification.type === 'error' ? <AlertCircle size={24} /> : <CheckCircle2 size={24} />}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`font-heading font-bold ${notification.type === 'error' ? 'text-red-700' : 'text-green-700'}`}>
+                        {notification.type === 'error' ? 'เกิดข้อผิดพลาด' : 'สำเร็จ'}
+                      </h4>
+                      <p className="text-slate-600 text-sm mt-0.5 font-medium">{notification.message}</p>
+                    </div>
+                    <button onClick={() => setNotification(null)} className="text-slate-400 hover:text-slate-600 transition-colors p-1">
+                      <X size={20} />
+                    </button>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100">
+                    <div className={`h-full animate-progress ${notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Sidebar Modernized */}
             <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-30 w-72 h-full bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ease-in-out shadow-xl md:shadow-none`}>
               {/* Header Sidebar */}
@@ -1234,15 +1307,6 @@
                 {/* Background Decor */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-100/40 rounded-full blur-[100px] pointer-events-none -z-10"></div>
                 
-                {notification && (
-                  <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 shadow-lg animate-fade-in ${
-                    notification.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
-                  }`}>
-                    {notification.type === 'error' ? <AlertCircle size={22} /> : <CheckCircle2 size={22} />}
-                    <p className="font-medium">{notification.message}</p>
-                  </div>
-                )}
-
                 <div className="pb-10 max-w-7xl mx-auto h-full">
                   {activeMenu === 'instructions' && RenderInstructions()}
                   {activeMenu === 'record' && RenderRecordForm()}
