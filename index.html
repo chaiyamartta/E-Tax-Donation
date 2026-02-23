@@ -546,30 +546,31 @@
                   <!-- ภาพลายน้ำตรงกลาง -->
                   <img src="https://img2.pic.in.th/pic/-Ver.3-1.png" alt="watermark" class="watermark" />
                   
-                  <div class="header-row-1">
-                    <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 80px; object-fit: contain;" />
-                    <div class="receipt-title">ใบรับเงินบริจาค</div>
-                  </div>
-                  <div class="header-row-2">
-                    <div>ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
-                    <div><strong>เลขที่</strong> ${receiptNo}</div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                    <!-- โลโก้และข้อความฝั่งซ้าย -->
+                    <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                      <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 80px; object-fit: contain; object-position: left top;" />
+                      <div style="font-size: 16px; color: #333; margin-top: 25px;">ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
+                    </div>
+                    
+                    <!-- ส่วนหัวฝั่งขวา (ใบรับเงิน, QR Code, เลขที่, Barcode) -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                      <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 10px;">
+                        <div class="receipt-title" style="margin-bottom: 0; padding-top: 5px;">ใบรับเงินบริจาค</div>
+                        ${receiptNo !== '-' ? `<img src="${qrCodeUrl}" alt="QR Code" style="width: 70px; height: 70px; border: 1px solid #ddd; padding: 2px;" />` : ''}
+                      </div>
+                      <div style="font-size: 16px; color: #333; margin-bottom: 8px;"><strong>เลขที่</strong> ${receiptNo}</div>
+                      ${receiptNo !== '-' ? `<img src="${barcodeUrl}" alt="Barcode" style="height: 35px; max-width: 250px; object-fit: contain;" />` : ''}
+                    </div>
                   </div>
                   
                   <div class="divider"></div>
                   
                   <div class="content-grid">
                     <div class="label">ผู้บริจาค</div>
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                      <div class="details">
-                        <div class="val-title">${donorName}</div>
-                        <div class="val-sub">เลขประจำตัวประชาชน / เลขประจำตัวผู้เสียภาษีอากร <strong>${formattedTaxId}</strong></div>
-                      </div>
-                      ${receiptNo !== '-' ? `
-                      <div style="display: flex; align-items: center; gap: 15px; margin-top: -5px;">
-                        <img src="${barcodeUrl}" alt="Barcode" style="height: 38px; max-width: 220px; object-fit: contain;" />
-                        <img src="${qrCodeUrl}" alt="QR Code" style="width: 65px; height: 65px; border: 1px solid #ddd; padding: 2px;" />
-                      </div>
-                      ` : ''}
+                    <div class="details">
+                      <div class="val-title">${donorName}</div>
+                      <div class="val-sub">เลขประจำตัวประชาชน / เลขประจำตัวผู้เสียภาษีอากร <strong>${formattedTaxId}</strong></div>
                     </div>
                     
                     <div class="label">หน่วยรับบริจาค</div>
