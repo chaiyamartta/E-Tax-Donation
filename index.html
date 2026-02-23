@@ -474,6 +474,10 @@
           const donationDateThai = formatThaiDate(donation.date);
           const bahtText = getThaiBahtText(totalAmount);
           const receiptNo = donation.receiptNo || '-';
+          
+          // URLs สำหรับสร้าง QR Code และ Barcode จาก API ภายนอก (ฟรี)
+          const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(receiptNo)}`;
+          const barcodeUrl = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encodeURIComponent(receiptNo)}&scale=3&height=10&includetext=false`;
 
           printWindow.document.write(`
             <html>
@@ -491,17 +495,17 @@
                     left: 50%;
                     transform: translate(-50%, -50%);
                     width: 450px;
-                    opacity: 0.08; /* ปรับความจางของลายน้ำที่นี่ */
+                    opacity: 0.08;
                     z-index: -1;
                     pointer-events: none;
                   }
                   
                   /* Header & Logos */
-                  .header-row-1 { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
-                  .receipt-title { font-size: 32px; font-weight: 700; color: #2e377d; }
+                  .header-row-1 { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+                  .receipt-title { font-size: 32px; font-weight: 700; color: #2e377d; margin-bottom: 8px; }
                   
                   /* Sub headers */
-                  .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 10px; color: #333; align-items: flex-end; }
+                  .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 15px; color: #333; align-items: flex-end; }
                   .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 25px; }
                   
                   /* Main Grid Content */
@@ -544,11 +548,17 @@
                   
                   <div class="header-row-1">
                     <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 80px; object-fit: contain;" />
-                    <div class="receipt-title">ใบรับเงินบริจาค</div>
+                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                      <div class="receipt-title">ใบรับเงินบริจาค</div>
+                      ${receiptNo !== '-' ? `<img src="${qrCodeUrl}" alt="QR Code" style="width: 75px; height: 75px; border: 1px solid #ddd; padding: 2px;" />` : ''}
+                    </div>
                   </div>
                   <div class="header-row-2">
                     <div>ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
-                    <div><strong>เลขที่</strong> ${receiptNo}</div>
+                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                      <div><strong>เลขที่</strong> ${receiptNo}</div>
+                      ${receiptNo !== '-' ? `<img src="${barcodeUrl}" alt="Barcode" style="height: 35px; margin-top: 6px; max-width: 250px; object-fit: contain;" />` : ''}
+                    </div>
                   </div>
                   
                   <div class="divider"></div>
@@ -605,9 +615,11 @@
                   </div>
                 </div>
                 <script>
-                  // สั่งพิมพ์อัตโนมัติเมื่อหน้าเว็บโหลดเสร็จ
+                  // หน่วงเวลาเล็กน้อยเพื่อให้เบราว์เซอร์ดาวน์โหลดภาพ QR/Barcode เสร็จก่อนสั่งพิมพ์
                   window.onload = function() {
-                    window.print();
+                    setTimeout(function() {
+                      window.print();
+                    }, 500);
                   }
                 <\/script>
               </body>
