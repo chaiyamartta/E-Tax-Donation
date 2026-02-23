@@ -8,11 +8,39 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- Tailwind Config สำหรับปรับแต่งฟอนต์และสี -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Sarabun', 'sans-serif'],
+            heading: ['Prompt', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#433385', /* สีรองจากโลโก้ */
+              900: '#2e377d', /* สีหลักจากโลโก้ */
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <!-- React & ReactDOM -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -22,14 +50,29 @@
 
   <style>
     body { 
-      font-family: 'Sarabun', Tahoma, sans-serif; 
+      background-color: #f8fafc;
+      color: #334155;
     }
     .animate-fade-in { 
-      animation: fadeIn 0.3s ease-in-out; 
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
     }
     @keyframes fadeIn { 
-      from { opacity: 0; transform: translateY(-10px); } 
+      from { opacity: 0; transform: translateY(10px); } 
       to { opacity: 1; transform: translateY(0); } 
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
   </style>
 </head>
@@ -79,6 +122,7 @@
     const User = (p) => <Icon {...p} paths={<><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>} />;
     const Clock = (p) => <Icon {...p} paths={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />;
     const Info = (p) => <Icon {...p} paths={<><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>} />;
+    const ShieldCheck = (p) => <Icon {...p} paths={<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></>} />;
 
     // ฟังก์ชันเริ่มการทำงานของแอป
     const startApp = () => {
@@ -626,75 +670,123 @@
         // ================= ส่วนประกอบ UI: ระบบ Login/Register =================
         if (!currentUser) {
           return (
-            <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 relative">
+            <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-brand-50 via-slate-100 to-brand-100 relative overflow-hidden">
+              
+              {/* พื้นหลังตกแต่ง */}
+              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-400/20 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-[900px] overflow-hidden flex flex-col md:flex-row relative z-10 animate-fade-in border border-white/50">
                 
                 {/* แจ้งเตือนสถานะการเชื่อมต่อ Database */}
                 {!isDbReady && (
-                  <div className="absolute top-0 left-0 w-full bg-amber-500 text-white text-xs text-center py-1 animate-pulse">
+                  <div className="absolute top-0 left-0 w-full bg-amber-500 text-white text-xs font-heading font-medium text-center py-1.5 animate-pulse z-50 shadow-sm">
                     กำลังเชื่อมต่อฐานข้อมูล Firebase...
                   </div>
                 )}
 
-                <div className="bg-[#1e3b6d] p-6 text-center text-white mt-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FileText size={32} />
+                {/* ฝั่งซ้าย: โลโก้และข้อความต้อนรับ */}
+                <div className="md:w-5/12 bg-gradient-to-br from-brand-900 to-brand-700 p-10 text-white flex flex-col justify-center items-center text-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-xl transform -translate-x-1/2 translate-y-1/2"></div>
+                  
+                  <div className="bg-white p-4 rounded-2xl shadow-lg mb-8 relative z-10 transform hover:scale-105 transition-transform duration-300">
+                    <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" className="w-32 h-auto object-contain" />
                   </div>
-                  <h1 className="text-2xl font-bold">ระบบ E-Donation</h1>
-                  <p className="text-sky-200 text-sm mt-1">วัดไชยามาตย์ (เชื่อมต่อ Cloud)</p>
+                  
+                  <h1 className="text-3xl font-heading font-bold mb-3 relative z-10 tracking-wide shadow-black/10 drop-shadow-md">ระบบ E-Donation</h1>
+                  <p className="text-brand-100 font-heading font-medium text-lg relative z-10 bg-white/10 px-4 py-1 rounded-full backdrop-blur-sm border border-white/10">วัดไชยามาตย์</p>
+                  
+                  <p className="mt-8 text-sm text-brand-100 opacity-90 relative z-10 leading-relaxed font-light">
+                    เชื่อมต่อข้อมูลการบริจาคเข้าสู่ระบบ<br/>กรมสรรพากรโดยตรง สะดวก ปลอดภัย<br/>และสามารถตรวจสอบได้
+                  </p>
                 </div>
                 
-                <div className="p-8">
+                {/* ฝั่งขวา: ฟอร์ม */}
+                <div className="md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-white relative">
+                  
                   {notification && (
-                    <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${notification.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
-                      {notification.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
+                    <div className={`absolute top-4 right-4 left-4 p-3 rounded-xl flex items-center gap-3 text-sm font-medium shadow-md animate-fade-in z-20 ${notification.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
+                      {notification.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
                       {notification.message}
                     </div>
                   )}
 
                   {authMode === 'login' ? (
-                    <form onSubmit={handleLogin} className="space-y-4">
-                      <h2 className="text-xl font-bold text-slate-800 text-center mb-6">เข้าสู่ระบบ</h2>
+                    <form onSubmit={handleLogin} className="space-y-5 animate-fade-in mt-4">
+                      <div className="text-center mb-8">
+                        <h2 className="text-2xl font-heading font-bold text-slate-800">เข้าสู่ระบบ</h2>
+                        <p className="text-slate-500 mt-2 text-sm">กรุณากรอกข้อมูลเพื่อเข้าใช้งานระบบ</p>
+                      </div>
+
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้งาน</label>
-                        <input type="text" name="username" value={authForm.username} onChange={handleAuthChange} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3b6d] outline-none" placeholder="Username" />
+                        <label className="block text-sm font-heading font-medium text-slate-700 mb-1.5 ml-1">ชื่อผู้ใช้งาน</label>
+                        <input type="text" name="username" value={authForm.username} onChange={handleAuthChange} required 
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all text-slate-800" 
+                          placeholder="Username" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน</label>
-                        <input type="password" name="password" value={authForm.password} onChange={handleAuthChange} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3b6d] outline-none" placeholder="Password" />
+                        <label className="block text-sm font-heading font-medium text-slate-700 mb-1.5 ml-1">รหัสผ่าน</label>
+                        <input type="password" name="password" value={authForm.password} onChange={handleAuthChange} required 
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all text-slate-800" 
+                          placeholder="••••••••" />
                       </div>
-                      <button type="submit" disabled={!isDbReady} className={`w-full text-white py-2.5 rounded-lg font-medium transition mt-2 ${isDbReady ? 'bg-[#1e3b6d] hover:bg-[#152a4e]' : 'bg-slate-400 cursor-not-allowed'}`}>
-                        {isDbReady ? 'เข้าสู่ระบบ' : 'กำลังเชื่อมต่อข้อมูล...'}
+                      
+                      <button type="submit" disabled={!isDbReady} 
+                        className={`w-full text-white py-3.5 rounded-xl font-heading font-semibold text-lg transition-all transform hover:-translate-y-0.5 mt-4 ${isDbReady ? 'bg-brand-900 hover:bg-brand-800 shadow-md hover:shadow-lg' : 'bg-slate-300 text-slate-500 cursor-not-allowed'}`}>
+                        {isDbReady ? 'เข้าสู่ระบบ' : 'กำลังเตรียมความพร้อม...'}
                       </button>
-                      <div className="text-center mt-4">
+                      
+                      <div className="text-center mt-6 pt-6 border-t border-slate-100">
                         <span className="text-slate-500 text-sm">ผู้บริจาคใหม่? </span>
-                        <button type="button" onClick={() => setAuthMode('register')} className="text-[#1e3b6d] font-medium hover:underline text-sm">สมัครสมาชิก (สร้างประวัติ)</button>
+                        <button type="button" onClick={() => setAuthMode('register')} className="text-brand-600 font-heading font-semibold hover:text-brand-800 hover:underline transition-colors text-sm ml-1">
+                          สร้างประวัติการบริจาค
+                        </button>
                       </div>
                     </form>
                   ) : (
-                    <form onSubmit={handleRegister} className="space-y-4">
-                      <h2 className="text-xl font-bold text-slate-800 text-center mb-6">สมัครสมาชิกผู้บริจาค</h2>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อ - นามสกุล</label>
-                        <input type="text" name="name" value={authForm.name} onChange={handleAuthChange} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3b6d] outline-none" />
+                    <form onSubmit={handleRegister} className="space-y-4 animate-fade-in mt-4">
+                      <div className="text-center mb-6">
+                        <h2 className="text-2xl font-heading font-bold text-slate-800">สมัครสมาชิกผู้บริจาค</h2>
+                        <p className="text-slate-500 mt-1 text-sm">สร้างบัญชีเพื่อบันทึกประวัติการขอลดหย่อนภาษี</p>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">เลขประจำตัวประชาชน (13 หลัก)</label>
-                        <input type="text" name="taxId" value={authForm.taxId} onChange={handleAuthChange} maxLength="13" required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3b6d] outline-none" />
-                        <p className="text-xs text-slate-500 mt-1">* ใช้สำหรับเชื่อมโยงประวัติการขอลดหย่อนภาษี</p>
+
+                      <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">ชื่อ - นามสกุล</label>
+                          <input type="text" name="name" value={authForm.name} onChange={handleAuthChange} required 
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">เลขประจำตัวประชาชน (13 หลัก)</label>
+                          <input type="text" name="taxId" value={authForm.taxId} onChange={handleAuthChange} maxLength="13" required 
+                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all font-mono" />
+                          <p className="text-[11px] text-slate-400 mt-1.5 ml-1 flex items-center gap-1"><ShieldCheck size={12}/> ข้อมูลถูกเข้ารหัสและใช้เชื่อมโยงกับสรรพากรเท่านั้น</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">ชื่อผู้ใช้งาน</label>
+                            <input type="text" name="username" value={authForm.username} onChange={handleAuthChange} required 
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">รหัสผ่าน</label>
+                            <input type="password" name="password" value={authForm.password} onChange={handleAuthChange} required 
+                              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all" />
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">ตั้งชื่อผู้ใช้งาน (Username)</label>
-                        <input type="text" name="username" value={authForm.username} onChange={handleAuthChange} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3b6d] outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">ตั้งรหัสผ่าน (Password)</label>
-                        <input type="password" name="password" value={authForm.password} onChange={handleAuthChange} required className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3b6d] outline-none" />
-                      </div>
-                      <button type="submit" disabled={!isDbReady} className={`w-full text-white py-2.5 rounded-lg font-medium transition mt-2 ${isDbReady ? 'bg-[#1e3b6d] hover:bg-[#152a4e]' : 'bg-slate-400 cursor-not-allowed'}`}>ยืนยันสมัครสมาชิก</button>
-                      <div className="text-center mt-4">
+                      
+                      <button type="submit" disabled={!isDbReady} 
+                        className={`w-full text-white py-3 rounded-xl font-heading font-semibold transition-all transform hover:-translate-y-0.5 mt-2 ${isDbReady ? 'bg-brand-900 hover:bg-brand-800 shadow-md' : 'bg-slate-300 cursor-not-allowed'}`}>
+                        ยืนยันสมัครสมาชิก
+                      </button>
+                      
+                      <div className="text-center mt-4 pt-4 border-t border-slate-100">
                         <span className="text-slate-500 text-sm">มีบัญชีอยู่แล้ว? </span>
-                        <button type="button" onClick={() => setAuthMode('login')} className="text-[#1e3b6d] font-medium hover:underline text-sm">กลับไปเข้าสู่ระบบ</button>
+                        <button type="button" onClick={() => setAuthMode('login')} className="text-brand-600 font-heading font-semibold hover:text-brand-800 hover:underline transition-colors text-sm ml-1">
+                          กลับไปเข้าสู่ระบบ
+                        </button>
                       </div>
                     </form>
                   )}
@@ -707,57 +799,58 @@
         // ================= ส่วนประกอบ UI: ระบบหลัง Login =================
 
         const RenderInstructions = () => (
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-[#1e3b6d] mb-6 border-b pb-4 flex items-center gap-2">
-              <Info size={28} className="text-sky-600" /> คำชี้แจงระบบ E-Donation
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-4xl mx-auto animate-fade-in">
+            <h2 className="text-2xl font-heading font-bold text-brand-900 mb-6 border-b border-slate-100 pb-4 flex items-center gap-3">
+              <div className="w-10 h-10 bg-brand-100 text-brand-600 rounded-xl flex items-center justify-center"><Info size={24} /></div>
+              คำชี้แจงระบบ E-Donation
             </h2>
             
-            <div className="space-y-8 text-slate-700 leading-relaxed">
-              <p className="text-lg">
-                ระบบ E-Donation เป็นระบบที่เชื่อมโยงข้อมูลการบริจาคระหว่างหน่วยรับบริจาคและกรมสรรพากร เพื่ออำนวยความสะดวกแก่ผู้บริจาคในการใช้สิทธิประโยชน์ทางภาษี โดยลดขั้นตอนการจัดเก็บและยื่นเอกสารหลักฐานด้วยตนเอง
+            <div className="space-y-8 text-slate-600 leading-relaxed">
+              <p className="text-lg bg-slate-50 p-5 rounded-xl border border-slate-100">
+                ระบบ E-Donation เป็นระบบที่เชื่อมโยงข้อมูลการบริจาคระหว่างหน่วยรับบริจาคและกรมสรรพากร เพื่ออำนวยความสะดวกแก่ผู้บริจาคในการใช้สิทธิประโยชน์ทางภาษี โดย <strong className="text-brand-700">ลดขั้นตอนการจัดเก็บและยื่นเอกสารหลักฐานด้วยตนเอง</strong>
               </p>
 
               <div>
-                <h3 className="text-lg font-bold text-[#1e3b6d] mb-3 flex items-center gap-2">
-                  <div className="w-2 h-6 bg-sky-500 rounded"></div> หลักการทำงานของระบบ
+                <h3 className="text-xl font-heading font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div> หลักการทำงานของระบบ
                 </h3>
-                <ul className="space-y-3 pl-2">
-                  <li className="flex gap-3">
-                    <span className="bg-sky-100 text-sky-700 font-bold rounded-full w-6 h-6 flex items-center justify-center shrink-0">1</span>
-                    <div><strong>ผู้บริจาคทำรายการบริจาค</strong><br/>ระบุข้อมูลที่จำเป็น เช่น เลขประจำตัวผู้เสียภาษีอากร หรือเลขบัตรประชาชน</div>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="bg-sky-100 text-sky-700 font-bold rounded-full w-6 h-6 flex items-center justify-center shrink-0">2</span>
-                    <div><strong>หน่วยรับบริจาคบันทึกข้อมูลเข้าสู่ระบบ E-Donation</strong><br/>พร้อมตรวจสอบความถูกต้องของข้อมูลผู้บริจาคและจำนวนเงิน</div>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="bg-sky-100 text-sky-700 font-bold rounded-full w-6 h-6 flex items-center justify-center shrink-0">3</span>
-                    <div><strong>หน่วยรับบริจาคทำการยืนยันข้อมูล</strong><br/>เมื่อยืนยันแล้ว ข้อมูลจะถูกส่งไปยังกรมสรรพากรโดยอัตโนมัติผ่านระบบอิเล็กทรอนิกส์</div>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="bg-sky-100 text-sky-700 font-bold rounded-full w-6 h-6 flex items-center justify-center shrink-0">4</span>
-                    <div><strong>กรมสรรพากรบันทึกข้อมูลเพื่อใช้สิทธิลดหย่อนภาษี</strong><br/>ข้อมูลการบริจาคจะปรากฏในระบบภาษีเงินได้ของผู้บริจาค โดยไม่ต้องแนบเอกสารเพิ่มเติม (ภายใต้เงื่อนไขที่กฎหมายกำหนด)</div>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-bold text-[#1e3b6d] mb-3 flex items-center gap-2">
-                  <div className="w-2 h-6 bg-emerald-500 rounded"></div> ประโยชน์สำหรับผู้บริจาค
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-2">
-                  <div className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500 shrink-0"/> ไม่ต้องเก็บใบเสร็จรับเงินตัวจริงเพื่อยื่นภาษี</div>
-                  <div className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500 shrink-0"/> ลดความผิดพลาดจากการกรอกข้อมูลเอง</div>
-                  <div className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500 shrink-0"/> สะดวก รวดเร็ว และตรวจสอบข้อมูลย้อนหลังได้</div>
-                  <div className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500 shrink-0"/> เพิ่มความมั่นใจว่าข้อมูลถูกส่งตรงถึงกรมสรรพากร</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-2">
+                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 bg-white hover:shadow-md transition-shadow">
+                    <span className="bg-blue-100 text-blue-700 font-heading font-bold rounded-xl w-10 h-10 flex items-center justify-center shrink-0 text-lg">1</span>
+                    <div><strong className="text-slate-800">ผู้บริจาคทำรายการ</strong><br/><span className="text-sm">ระบุข้อมูลที่จำเป็น เช่น เลขประจำตัวผู้เสียภาษีอากร</span></div>
+                  </div>
+                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 bg-white hover:shadow-md transition-shadow">
+                    <span className="bg-blue-100 text-blue-700 font-heading font-bold rounded-xl w-10 h-10 flex items-center justify-center shrink-0 text-lg">2</span>
+                    <div><strong className="text-slate-800">หน่วยรับบริจาคบันทึกข้อมูล</strong><br/><span className="text-sm">เจ้าหน้าที่ตรวจสอบความถูกต้องและบันทึกเข้าระบบ</span></div>
+                  </div>
+                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 bg-white hover:shadow-md transition-shadow">
+                    <span className="bg-blue-100 text-blue-700 font-heading font-bold rounded-xl w-10 h-10 flex items-center justify-center shrink-0 text-lg">3</span>
+                    <div><strong className="text-slate-800">ยืนยันข้อมูลไปยังสรรพากร</strong><br/><span className="text-sm">ข้อมูลถูกส่งไปยังกรมสรรพากรอัตโนมัติ</span></div>
+                  </div>
+                  <div className="flex gap-4 p-4 rounded-xl border border-slate-100 bg-white hover:shadow-md transition-shadow">
+                    <span className="bg-blue-100 text-blue-700 font-heading font-bold rounded-xl w-10 h-10 flex items-center justify-center shrink-0 text-lg">4</span>
+                    <div><strong className="text-slate-800">ใช้สิทธิลดหย่อนได้ทันที</strong><br/><span className="text-sm">ปรากฏในระบบภาษีโดยไม่ต้องแนบเอกสารเพิ่ม</span></div>
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-5">
-                <h3 className="text-md font-bold text-amber-800 mb-3 flex items-center gap-2">
-                  <AlertCircle size={20}/> เงื่อนไขสำคัญ
+              <div>
+                <h3 className="text-xl font-heading font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div> ประโยชน์สำหรับผู้บริจาค
                 </h3>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-amber-900">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-2">
+                  <div className="flex items-center gap-3 p-3 bg-emerald-50/50 rounded-lg"><CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> ไม่ต้องเก็บใบเสร็จรับเงินตัวจริงเพื่อยื่นภาษี</div>
+                  <div className="flex items-center gap-3 p-3 bg-emerald-50/50 rounded-lg"><CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> ลดความผิดพลาดจากการกรอกข้อมูลเอง</div>
+                  <div className="flex items-center gap-3 p-3 bg-emerald-50/50 rounded-lg"><CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> สะดวก รวดเร็ว และตรวจสอบข้อมูลย้อนหลังได้</div>
+                  <div className="flex items-center gap-3 p-3 bg-emerald-50/50 rounded-lg"><CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> เพิ่มความมั่นใจข้อมูลส่งตรงถึงกรมสรรพากร</div>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-5 shadow-sm">
+                <h3 className="text-lg font-heading font-bold text-amber-800 mb-3 flex items-center gap-2">
+                  <AlertCircle size={22}/> เงื่อนไขสำคัญ
+                </h3>
+                <ul className="list-disc pl-6 space-y-2 text-sm text-amber-900/80 marker:text-amber-400">
                   <li>หน่วยรับบริจาคต้องเป็นหน่วยงานที่เข้าร่วมระบบ E-Donation และได้รับอนุมัติจากกรมสรรพากร</li>
                   <li>ผู้บริจาคต้องแจ้งข้อมูลประจำตัวผู้เสียภาษีให้ถูกต้องครบถ้วน</li>
                   <li>สิทธิการหักลดหย่อนเป็นไปตามประเภทของเงินบริจาคและตามที่กฎหมายกำหนด</li>
@@ -765,21 +858,12 @@
                 </ul>
               </div>
 
-              <div className="bg-red-50 border border-red-200 rounded-lg p-5 mt-4">
-                <h3 className="text-lg font-bold text-red-800 mb-2 flex items-center gap-2">
-                  <AlertCircle size={24}/> เน้นย้ำ
-                </h3>
-                <p className="text-red-700 font-bold text-lg">
-                  ระบบนี้เป็นระบบสำหรับหน่วยรับบริจาค "วัดไชยามาตย์" เท่านั้น
-                </p>
-              </div>
-
               <div className="pt-8 flex justify-center">
                 <button 
                   onClick={() => setActiveMenu('donor_request')}
-                  className="bg-[#1e3b6d] hover:bg-[#152a4e] text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3 transform hover:-translate-y-1"
+                  className="bg-brand-900 hover:bg-brand-800 text-white px-8 py-3.5 rounded-2xl font-heading font-semibold text-lg shadow-lg shadow-brand-900/20 hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3"
                 >
-                  <FileText size={24} /> ยื่นขอลดหย่อนภาษี
+                  <FileText size={22} /> ยื่นขอลดหย่อนภาษี
                 </button>
               </div>
             </div>
@@ -790,86 +874,113 @@
           const isDonor = currentUser.role === 'donor';
           
           return (
-            <div className="max-w-4xl mx-auto bg-slate-50 border border-slate-200 rounded-lg p-6 sm:p-10 shadow-sm">
-              <h2 className="text-xl font-bold text-[#1e3b6d] mb-6 flex items-center gap-2 border-b pb-3">
-                <FileText /> {isDonor ? 'แจ้งขอรับใบลดหย่อนภาษี (E-Donation)' : 'บันทึกรายการเงินบริจาค (Admin)'}
-              </h2>
-              <form onSubmit={handleSubmitDonation} className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                  <label className="sm:w-1/3 text-sm font-medium text-slate-700 sm:text-right">วันที่บริจาค :</label>
-                  <div className="sm:w-2/3"><input type="date" name="date" value={formData.date} onChange={handleInputChange} required className="px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-[#1e3b6d] outline-none w-48" /></div>
+            <div className="max-w-4xl mx-auto bg-white border border-slate-100 rounded-2xl p-6 sm:p-10 shadow-sm animate-fade-in">
+              <h2 className="text-2xl font-heading font-bold text-brand-900 mb-8 flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center">
+                  {isDonor ? <FileText size={22} /> : <CheckCircle2 size={22} />}
                 </div>
-
-                {!isDonor && (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                    <label className="sm:w-1/3 text-sm font-medium text-slate-700 sm:text-right">ประเภทการบริจาค <span className="text-red-500">*</span> :</label>
-                    <div className="sm:w-2/3 flex items-center gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer"><input type="radio" checked={!formData.isAnonymous} onChange={() => setFormData({...formData, isAnonymous: false})} className="text-[#1e3b6d]" /><span className="text-sm">ประสงค์ออกนาม</span></label>
-                      <label className="flex items-center gap-2 cursor-pointer"><input type="radio" checked={formData.isAnonymous} onChange={() => setFormData({...formData, isAnonymous: true})} className="text-[#1e3b6d]" /><span className="text-sm">ไม่ประสงค์ออกนาม</span></label>
+                {isDonor ? 'แจ้งขอรับใบลดหย่อนภาษี (E-Donation)' : 'บันทึกรายการเงินบริจาค (Admin)'}
+              </h2>
+              
+              <form onSubmit={handleSubmitDonation} className="space-y-6">
+                
+                {/* Section: วันที่และประเภท */}
+                <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100 space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                    <label className="sm:w-1/3 text-sm font-heading font-medium text-slate-700 sm:text-right">วันที่บริจาค :</label>
+                    <div className="sm:w-2/3">
+                      <input type="date" name="date" value={formData.date} onChange={handleInputChange} required 
+                        className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none w-full sm:w-56 transition-all text-slate-700" />
                     </div>
                   </div>
-                )}
 
+                  {!isDonor && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                      <label className="sm:w-1/3 text-sm font-heading font-medium text-slate-700 sm:text-right">ประเภทการบริจาค <span className="text-red-500">*</span> :</label>
+                      <div className="sm:w-2/3 flex items-center gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${!formData.isAnonymous ? 'border-brand-500 border-4' : 'border-slate-300 group-hover:border-brand-300'}`}></div>
+                          <input type="radio" checked={!formData.isAnonymous} onChange={() => setFormData({...formData, isAnonymous: false})} className="hidden" />
+                          <span className="text-sm font-medium text-slate-700">ประสงค์ออกนาม</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${formData.isAnonymous ? 'border-brand-500 border-4' : 'border-slate-300 group-hover:border-brand-300'}`}></div>
+                          <input type="radio" checked={formData.isAnonymous} onChange={() => setFormData({...formData, isAnonymous: true})} className="hidden" />
+                          <span className="text-sm font-medium text-slate-700">ไม่ประสงค์ออกนาม</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Section: ข้อมูลผู้บริจาค */}
                 {(!formData.isAnonymous || isDonor) && (
-                  <>
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 pt-2">
-                      <label className="sm:w-1/3 text-sm font-medium text-slate-700 sm:text-right leading-tight">เลขประจำตัวประชาชน <span className="text-red-500">*</span> :</label>
+                  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-brand-500"></div>
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                      <label className="sm:w-1/3 text-sm font-heading font-medium text-slate-700 sm:text-right leading-tight">เลขประจำตัวประชาชน <span className="text-red-500">*</span> :</label>
                       <div className="sm:w-2/3">
                         <div className="flex gap-2">
-                          <input type="text" name="taxId" value={isDonor ? currentUser.taxId : formData.taxId} onChange={handleInputChange} disabled={isDonor} maxLength="13" required className={`px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-[#1e3b6d] outline-none w-48 ${isDonor ? 'bg-slate-200 text-slate-600' : ''}`} />
+                          <input type="text" name="taxId" value={isDonor ? currentUser.taxId : formData.taxId} onChange={handleInputChange} disabled={isDonor} maxLength="13" required 
+                            className={`px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none w-full sm:w-56 font-mono text-center tracking-widest ${isDonor ? 'bg-slate-100 text-slate-500 font-semibold' : 'bg-white text-slate-800'}`} placeholder="x-xxxx-xxxxx-xx-x"/>
                           {!isDonor && (
-                            <button type="button" onClick={handleVerifyTaxId} className="flex items-center gap-1 bg-[#5bc0de] hover:bg-[#46b8da] transition-colors text-white px-3 py-2 rounded text-sm shadow-sm">
-                              <SearchCode size={16} /> ตรวจสอบ
+                            <button type="button" onClick={handleVerifyTaxId} className="flex items-center justify-center gap-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors px-4 py-2.5 rounded-xl text-sm font-heading font-medium">
+                              <SearchCode size={18} /> ค้นหา
                             </button>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    {formData.donorType === 'individual' ? (
-                      <div className="space-y-4 pt-2">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                          <label className="sm:w-1/3 text-sm font-medium text-slate-700 sm:text-right">ชื่อ <span className="text-red-500">*</span> :</label>
-                          <div className="sm:w-2/3 flex flex-col sm:flex-row gap-4">
-                            <input type="text" name="firstName" value={isDonor ? currentUser.name.split(' ')[0] : formData.firstName} onChange={handleInputChange} disabled={isDonor} required className="w-full px-3 py-1.5 border-b border-slate-300 focus:border-[#1e3b6d] outline-none bg-transparent" placeholder="ชื่อจริง" />
-                            <div className="flex items-center gap-2 w-full">
-                              <label className="text-sm font-medium text-slate-700 whitespace-nowrap">นามสกุล <span className="text-red-500">*</span> :</label>
-                              <input type="text" name="lastName" value={isDonor ? currentUser.name.split(' ').slice(1).join(' ') : formData.lastName} onChange={handleInputChange} disabled={isDonor} required className="w-full px-3 py-1.5 border-b border-slate-300 focus:border-[#1e3b6d] outline-none bg-transparent" />
-                            </div>
-                          </div>
+                    {formData.donorType === 'individual' && (
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 pt-2">
+                        <label className="sm:w-1/3 text-sm font-heading font-medium text-slate-700 sm:text-right sm:pt-2">ชื่อ - นามสกุล <span className="text-red-500">*</span> :</label>
+                        <div className="sm:w-2/3 flex flex-col sm:flex-row gap-4">
+                          <input type="text" name="firstName" value={isDonor ? currentUser.name.split(' ')[0] : formData.firstName} onChange={handleInputChange} disabled={isDonor} required 
+                            className={`w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all ${isDonor ? 'bg-slate-50 text-slate-600' : 'bg-white text-slate-800'}`} placeholder="ชื่อจริง" />
+                          <input type="text" name="lastName" value={isDonor ? currentUser.name.split(' ').slice(1).join(' ') : formData.lastName} onChange={handleInputChange} disabled={isDonor} required 
+                            className={`w-full px-4 py-2.5 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all ${isDonor ? 'bg-slate-50 text-slate-600' : 'bg-white text-slate-800'}`} placeholder="นามสกุล" />
                         </div>
                       </div>
-                    ) : null}
-                  </>
+                    )}
+                  </div>
                 )}
 
-                <hr className="border-slate-200" />
+                {/* Section: รายการบริจาค */}
+                <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100 space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-6">
+                    <label className="sm:w-1/3 text-sm font-heading font-medium text-slate-700 sm:text-right sm:pt-2.5">รายการที่บริจาค <span className="text-red-500">*</span> :</label>
+                    <div className="sm:w-2/3 space-y-3">
+                      
+                      <div className="flex items-center gap-3 bg-white p-2 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:border-brand-400 transition-all shadow-sm">
+                        <div className="bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-heading font-medium whitespace-nowrap">เงินสด</div>
+                        <input type="number" name="cashAmount" value={formData.cashAmount} onChange={handleInputChange} min="0" placeholder="0.00"
+                          className="flex-1 bg-transparent px-2 py-1 outline-none text-slate-800 font-medium text-right" />
+                        <span className="text-sm font-medium text-slate-500 pr-2">บาท</span>
+                      </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                  <label className="sm:w-1/3 text-sm font-medium text-slate-700 sm:text-right pt-2">รายการที่บริจาค <span className="text-red-500">*</span> :</label>
-                  <div className="sm:w-2/3 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm w-16">เงินสด :</span>
-                      <input type="number" name="cashAmount" value={formData.cashAmount} onChange={handleInputChange} min="0" className="px-3 py-1.5 border border-slate-300 rounded w-48 focus:ring-1 focus:ring-[#1e3b6d] outline-none" />
-                      <span className="text-sm">บาท</span>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm w-16">ทรัพย์สิน :</span>
-                        <input type="text" name="assetName" value={formData.assetName} onChange={handleInputChange} className="px-3 py-1.5 border border-slate-300 rounded w-48 focus:ring-1 focus:ring-[#1e3b6d] outline-none" placeholder="เช่น ข้าวสาร, คอมพิวเตอร์" />
+                      <div className="flex flex-col gap-3 p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                          <div className="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg text-sm font-heading font-medium whitespace-nowrap">ทรัพย์สิน</div>
+                          <input type="text" name="assetName" value={formData.assetName} onChange={handleInputChange} 
+                            className="flex-1 w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:bg-white focus:border-amber-400 text-sm" placeholder="ระบุชื่อทรัพย์สิน เช่น คอมพิวเตอร์" />
+                        </div>
+                        <div className="flex items-center justify-end gap-3 w-full border-t border-slate-100 pt-3">
+                          <span className="text-sm text-slate-500 font-medium">ประเมินมูลค่า :</span>
+                          <input type="number" name="assetValue" value={formData.assetValue} onChange={handleInputChange} min="0" placeholder="0.00"
+                            className="w-32 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none focus:bg-white focus:border-amber-400 text-right font-medium" />
+                          <span className="text-sm text-slate-500 font-medium">บาท</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 pl-[72px] sm:pl-0">
-                        <span className="text-sm">มูลค่า :</span>
-                        <input type="number" name="assetValue" value={formData.assetValue} onChange={handleInputChange} min="0" className="px-3 py-1.5 border border-slate-300 rounded w-32 focus:ring-1 focus:ring-[#1e3b6d] outline-none" />
-                        <span className="text-sm">บาท</span>
-                      </div>
+
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-center gap-3 pt-6">
-                  <button type="submit" className="bg-[#1e3b6d] hover:bg-[#152a4e] text-white px-6 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors">
-                    <FileText size={18} /> {isDonor ? 'ส่งแจ้งขอใบลดหย่อน' : 'บันทึกเข้าระบบ'}
+                <div className="flex justify-center pt-6">
+                  <button type="submit" className="bg-brand-900 hover:bg-brand-800 text-white px-10 py-3.5 rounded-2xl font-heading font-bold text-lg shadow-lg shadow-brand-900/20 hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3">
+                    <FileText size={20} /> {isDonor ? 'ส่งเรื่องแจ้งขอใบลดหย่อน' : 'บันทึกเข้าระบบ'}
                   </button>
                 </div>
               </form>
@@ -884,85 +995,94 @@
             : donations.filter(d => (d.firstName + d.lastName + d.corpName).toLowerCase().includes(searchTerm.toLowerCase()) || (d.taxId && d.taxId.includes(searchTerm)));
 
           return (
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-              <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50">
-                <h2 className="text-lg font-bold text-[#1e3b6d]">
-                  {isDonor ? 'ประวัติการขอลดหย่อนภาษีของฉัน' : 'รายการตรวจสอบและส่งออก (Admin)'}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in flex flex-col h-full">
+              <div className="p-5 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h2 className="text-xl font-heading font-bold text-brand-900 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-brand-50 text-brand-600 rounded-lg flex items-center justify-center"><Clock size={18}/></div>
+                  {isDonor ? 'ประวัติการขอลดหย่อนภาษี' : 'รายการรอตรวจสอบ (Admin)'}
                 </h2>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                   {!isDonor && (
                     <>
-                      <div className="relative w-64">
+                      <div className="relative flex-1 sm:w-64">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                          <Search size={16} />
+                          <Search size={18} />
                         </span>
-                        <input type="text" placeholder="ค้นหาชื่อ, เลขผู้เสียภาษี..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 rounded focus:ring-1 focus:ring-sky-500 outline-none" />
+                        <input type="text" placeholder="ค้นหาชื่อ, เลขผู้เสียภาษี..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} 
+                          className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 outline-none transition-all" />
                       </div>
-                      <button onClick={exportToCSV} className="flex items-center gap-2 bg-emerald-600 text-white px-3 py-1.5 rounded text-sm hover:bg-emerald-700 transition shadow-sm">
-                        <Download size={16} /> Export CSV สรรพากร
+                      <button onClick={exportToCSV} className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white px-4 py-2 rounded-xl text-sm font-heading font-medium transition-colors shadow-sm">
+                        <Download size={18} /> ส่งออก CSV
                       </button>
                     </>
                   )}
                 </div>
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto flex-1 custom-scrollbar">
                 <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-[#b3d4fc] text-slate-800 border-b border-slate-300">
+                  <thead className="bg-slate-50 text-slate-600 font-heading border-y border-slate-200 sticky top-0 z-10">
                     <tr>
-                      <th className="px-4 py-3 border-r border-slate-300 text-center font-semibold">วันที่บริจาค</th>
-                      {!isDonor && <th className="px-4 py-3 border-r border-slate-300 text-center font-semibold">เลขประชาชน</th>}
-                      <th className="px-4 py-3 border-r border-slate-300 text-center font-semibold">{isDonor ? 'รายการ' : 'ชื่อ-นามสกุล'}</th>
-                      <th className="px-4 py-3 border-r border-slate-300 text-center font-semibold">มูลค่ารวม (บาท)</th>
-                      <th className="px-4 py-3 border-r border-slate-300 text-center font-semibold">สถานะ</th>
-                      <th className="px-4 py-3 border-r border-slate-300 text-center font-semibold">เอกสาร (PDF)</th>
-                      {!isDonor && <th className="px-4 py-3 text-center font-semibold">จัดการ</th>}
+                      <th className="px-5 py-4 font-semibold text-center w-24">วันที่</th>
+                      {!isDonor && <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">เลขประจำตัว</th>}
+                      <th className="px-5 py-4 font-semibold border-l border-slate-200">{isDonor ? 'รายการบริจาค' : 'ชื่อ-นามสกุล'}</th>
+                      <th className="px-5 py-4 font-semibold text-right border-l border-slate-200">มูลค่า (บาท)</th>
+                      <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">สถานะ</th>
+                      <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">ใบเสร็จ</th>
+                      {!isDonor && <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">จัดการ</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody className="divide-y divide-slate-100">
                     {displayDonations.map((d) => (
-                      <tr key={d.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 border-r border-slate-200 text-center">{d.date.split('-').reverse().join('/')}</td>
-                        {!isDonor && <td className="px-4 py-3 border-r border-slate-200 text-center font-mono">{d.taxId}</td>}
-                        <td className="px-4 py-3 border-r border-slate-200">
+                      <tr key={d.id} className="hover:bg-brand-50/30 transition-colors group">
+                        <td className="px-5 py-3 text-center text-slate-500">{d.date.split('-').reverse().join('/')}</td>
+                        {!isDonor && <td className="px-5 py-3 text-center font-mono text-slate-600 tracking-wider text-[13px]">{d.taxId}</td>}
+                        <td className="px-5 py-3 font-medium text-slate-800">
                           {isDonor 
-                            ? (d.cashAmount > 0 && d.assetValue > 0 ? 'เงินสด และ ทรัพย์สิน' : d.cashAmount > 0 ? 'เงินสด' : d.assetName)
-                            : `${d.prefix}${d.firstName} ${d.lastName}`
+                            ? (
+                                <div className="flex items-center gap-2">
+                                  {d.cashAmount > 0 && <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[11px] font-heading">เงินสด</span>}
+                                  {d.assetValue > 0 && <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[11px] font-heading">{d.assetName || 'ทรัพย์สิน'}</span>}
+                                </div>
+                              )
+                            : `${d.prefix || ''}${d.firstName} ${d.lastName}`.trim()
                           }
                         </td>
-                        <td className="px-4 py-3 border-r border-slate-200 text-right text-[#1e3b6d] font-bold">
+                        <td className="px-5 py-3 text-right text-brand-700 font-bold text-[15px]">
                           {(d.cashAmount + d.assetValue).toLocaleString()}
                         </td>
-                        <td className="px-4 py-3 border-r border-slate-200 text-center">
+                        <td className="px-5 py-3 text-center">
                           {d.status === 'approved' 
-                            ? <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded-full"><CheckCircle size={14} /> อนุมัติแล้ว</span>
-                            : <span className="inline-flex items-center gap-1 text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full"><Clock size={14} /> รอดำเนินการ</span>
+                            ? <span className="inline-flex items-center gap-1 text-[12px] font-heading font-medium bg-green-100/80 text-green-700 px-2.5 py-1 rounded-lg border border-green-200"><CheckCircle size={14} /> อนุมัติแล้ว</span>
+                            : <span className="inline-flex items-center gap-1 text-[12px] font-heading font-medium bg-amber-100/80 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200"><Clock size={14} /> รอตรวจสอบ</span>
                           }
                         </td>
-                        <td className="px-4 py-3 border-r border-slate-200 text-center">
+                        <td className="px-5 py-3 text-center">
                           {d.status === 'approved' ? (
-                            <button onClick={() => handleDownloadReceipt(d)} className="text-sky-600 hover:text-sky-800 text-xs font-medium flex items-center justify-center gap-1 w-full p-1 rounded hover:bg-sky-50 transition-colors">
-                              <Download size={14} /> {isDonor ? 'โหลดใบเสร็จ' : 'ดู PDF / พิมพ์'}
+                            <button onClick={() => handleDownloadReceipt(d)} className="text-brand-600 hover:text-white bg-brand-50 hover:bg-brand-600 border border-brand-200 text-[12px] font-heading font-medium flex items-center justify-center gap-1.5 w-full p-1.5 rounded-lg transition-all shadow-sm">
+                              <Download size={14} /> {isDonor ? 'ใบเสร็จรับเงิน' : 'พิมพ์'}
                             </button>
                           ) : (
-                            <span className="text-slate-400 text-xs">-</span>
+                            <span className="text-slate-300 text-xs">-</span>
                           )}
                         </td>
                         {!isDonor && (
-                          <td className="px-4 py-3 text-center flex justify-center gap-2">
+                          <td className="px-5 py-3 text-center flex justify-center gap-2 items-center">
                             {d.status === 'pending' && approveInputId !== d.id && (
-                              <button onClick={() => { setApproveInputId(d.id); setReceiptNoInput(''); }} className="text-green-600 hover:text-green-800 bg-green-50 px-2 py-1 rounded text-xs border border-green-200 flex items-center gap-1">
-                                <CheckCircle2 size={14} /> อนุมัติ
+                              <button onClick={() => { setApproveInputId(d.id); setReceiptNoInput(''); }} className="text-green-700 hover:text-white bg-green-50 hover:bg-green-600 p-1.5 rounded-lg border border-green-200 transition-colors tooltip" title="อนุมัติรายการ">
+                                <CheckCircle2 size={18} />
                               </button>
                             )}
                             {approveInputId === d.id && (
-                              <div className="flex items-center gap-1">
-                                <input type="text" value={receiptNoInput} onChange={(e) => setReceiptNoInput(e.target.value)} placeholder="เลขที่ใบเสร็จ" className="text-xs px-2 py-1 border rounded w-32 outline-none focus:ring-1 focus:ring-green-500" autoFocus />
-                                <button onClick={() => confirmApprove(d.id)} className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">ตกลง</button>
-                                <button onClick={() => setApproveInputId(null)} className="bg-slate-400 text-white px-2 py-1 rounded text-xs hover:bg-slate-500">ยกเลิก</button>
+                              <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                                <input type="text" value={receiptNoInput} onChange={(e) => setReceiptNoInput(e.target.value)} placeholder="เลขที่ใบเสร็จ e-Donation" className="text-xs px-2 py-1.5 border border-slate-200 rounded-md w-36 outline-none focus:ring-1 focus:ring-brand-500 font-mono" autoFocus />
+                                <button onClick={() => confirmApprove(d.id)} className="bg-green-600 text-white px-2 py-1.5 rounded-md text-xs hover:bg-green-700 font-heading">บันทึก</button>
+                                <button onClick={() => setApproveInputId(null)} className="bg-slate-200 text-slate-600 px-2 py-1.5 rounded-md text-xs hover:bg-slate-300 font-heading">ยกเลิก</button>
                               </div>
                             )}
                             {approveInputId !== d.id && (
-                              <button onClick={() => handleDelete(d.id)} className="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs border border-red-200"><Trash2 size={14}/></button>
+                              <button onClick={() => handleDelete(d.id)} className="text-red-500 hover:text-white bg-red-50 hover:bg-red-500 p-1.5 rounded-lg border border-red-200 transition-colors opacity-50 group-hover:opacity-100" title="ลบรายการ">
+                                <Trash2 size={18}/>
+                              </button>
                             )}
                           </td>
                         )}
@@ -970,8 +1090,11 @@
                     ))}
                     {displayDonations.length === 0 && (
                       <tr>
-                        <td colSpan={isDonor ? 5 : 7} className="px-4 py-8 text-center text-slate-500">
-                          ไม่พบข้อมูลการบริจาค
+                        <td colSpan={isDonor ? 5 : 7} className="px-5 py-16 text-center text-slate-400 font-medium">
+                          <div className="flex flex-col items-center gap-2">
+                            <FileText size={32} className="opacity-50" />
+                            ยังไม่มีข้อมูลการบริจาค
+                          </div>
                         </td>
                       </tr>
                     )}
@@ -983,79 +1106,97 @@
         };
 
         const adminMenus = [
-          { id: 'list', label: 'ตรวจสอบรายการและส่งออก', icon: <FileText size={18} /> },
-          { id: 'record', label: 'บันทึกรายการ (Admin)', icon: <CheckCircle2 size={18} /> },
-          { id: 'report', label: 'รายงานสรุปยอดเงินบริจาค', icon: <BarChart3 size={18} /> },
-          { id: 'manageUsers', label: 'จัดการผู้ใช้งานระบบ', icon: <Users size={18} /> },
+          { id: 'list', label: 'ตรวจสอบและอนุมัติ', icon: <Clock size={20} /> },
+          { id: 'record', label: 'บันทึกรายการบริจาค', icon: <CheckCircle2 size={20} /> },
+          { id: 'report', label: 'รายงานสรุปยอด', icon: <BarChart3 size={20} /> },
+          { id: 'manageUsers', label: 'จัดการผู้ใช้งาน', icon: <Users size={20} /> },
         ];
 
         const donorMenus = [
-          { id: 'instructions', label: 'คำชี้แจงระบบ', icon: <Info size={18} /> },
-          { id: 'donor_history', label: 'ประวัติการขอใบลดหย่อน', icon: <Clock size={18} /> },
-          { id: 'donor_request', label: 'แจ้งขอใบลดหย่อนใหม่', icon: <FileText size={18} /> },
+          { id: 'instructions', label: 'คำชี้แจงระบบ', icon: <Info size={20} /> },
+          { id: 'donor_history', label: 'ประวัติของฉัน', icon: <Clock size={20} /> },
+          { id: 'donor_request', label: 'ขอลดหย่อนใหม่', icon: <FileText size={20} /> },
         ];
 
         const menuItems = currentUser.role === 'admin' ? adminMenus : donorMenus;
 
         return (
-          <div className="flex h-screen bg-[#f8f9fa] font-sans overflow-hidden">
+          <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
             
-            <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-20 w-72 h-full bg-[#f1f5f9] border-r border-slate-300 flex flex-col transition-transform duration-300 ease-in-out`}>
-              <div className="bg-[#1e3b6d] text-white py-4 px-6 shadow-md z-10">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-lg font-bold">เมนูการทำงาน</span>
-                  <button className="md:hidden text-white hover:text-sky-200" onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
+            {/* Sidebar Modernized */}
+            <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-30 w-72 h-full bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 ease-in-out shadow-xl md:shadow-none`}>
+              {/* Header Sidebar */}
+              <div className="py-6 px-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                <div className="flex items-center gap-3">
+                  <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" className="h-8 w-auto object-contain" alt="Logo"/>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-sky-200 border-t border-sky-800 pt-2 mt-2">
-                  <User size={16} />
-                  <div className="truncate">
-                    <p className="font-medium text-white">{currentUser.name}</p>
-                    <p className="text-xs">{currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้บริจาค'}</p>
-                  </div>
+                <button className="md:hidden text-slate-400 hover:text-slate-600" onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
+              </div>
+              
+              {/* User Profile Area */}
+              <div className="mx-4 my-4 p-4 rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100/50 border border-brand-100 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-brand-900 text-white flex items-center justify-center font-heading font-bold shadow-sm">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="font-heading font-bold text-brand-900 text-sm truncate">{currentUser.name}</p>
+                  <p className="text-[11px] font-medium text-brand-600 bg-brand-200/50 px-2 py-0.5 rounded-md inline-block mt-1">
+                    {currentUser.role === 'admin' ? 'ผู้ดูแลระบบ (Admin)' : 'ผู้บริจาค (Donor)'}
+                  </p>
                 </div>
               </div>
               
-              <div className="flex-1 overflow-y-auto py-2">
-                {menuItems.map((menu) => (
-                  <button
-                    key={menu.id}
-                    onClick={() => { setActiveMenu(menu.id); if(window.innerWidth < 768) setIsSidebarOpen(false); }}
-                    className={`w-full text-left px-6 py-4 border-b border-slate-300 text-[15px] transition-colors flex items-center gap-3 ${
-                      activeMenu === menu.id 
-                        ? 'bg-white text-[#1e3b6d] font-bold border-l-4 border-l-[#1e3b6d]' 
-                        : 'text-[#1e3b6d] font-medium hover:bg-[#e2e8f0]'
-                    }`}
-                  >
-                    {menu.icon} {menu.label}
-                  </button>
-                ))}
+              <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+                <p className="px-6 text-xs font-heading font-bold text-slate-400 uppercase tracking-wider mb-2 mt-2">เมนูหลัก</p>
+                {menuItems.map((menu) => {
+                  const isActive = activeMenu === menu.id;
+                  return (
+                    <button
+                      key={menu.id}
+                      onClick={() => { setActiveMenu(menu.id); if(window.innerWidth < 768) setIsSidebarOpen(false); }}
+                      className={`w-[calc(100%-2rem)] mx-4 my-1 px-4 py-3 rounded-xl text-[15px] transition-all duration-200 flex items-center gap-3 font-heading ${
+                        isActive 
+                          ? 'bg-brand-900 text-white font-semibold shadow-md shadow-brand-900/20' 
+                          : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-brand-900'
+                      }`}
+                    >
+                      <span className={isActive ? 'text-brand-200' : 'text-slate-400'}>{menu.icon}</span> 
+                      {menu.label}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div onClick={handleLogout} className="bg-red-50 text-red-600 py-4 px-6 font-bold cursor-pointer hover:bg-red-100 transition-colors flex items-center justify-center gap-2 border-t border-slate-300">
-                <LogOut size={18} /> ออกจากระบบ
+              <div className="p-4 border-t border-slate-100">
+                <button onClick={handleLogout} className="w-full text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700 py-3 rounded-xl font-heading font-semibold transition-colors flex items-center justify-center gap-2 border border-red-100">
+                  <LogOut size={18} /> ออกจากระบบ
+                </button>
               </div>
             </div>
 
             <div className="flex-1 flex flex-col h-screen relative overflow-hidden">
-              <header className="bg-white border-b border-slate-200 p-4 flex items-center justify-between shadow-sm md:hidden">
+              {/* Mobile Header */}
+              <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 flex items-center justify-between shadow-sm md:hidden sticky top-0 z-20">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setIsSidebarOpen(true)} className="text-[#1e3b6d]"><Menu size={24} /></button>
-                  <h1 className="font-bold text-[#1e3b6d]">E-Donation</h1>
+                  <button onClick={() => setIsSidebarOpen(true)} className="text-brand-900 bg-brand-50 p-2 rounded-lg"><Menu size={24} /></button>
+                  <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" className="h-6 w-auto" alt="Logo"/>
                 </div>
               </header>
 
-              <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100/50">
+              <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-50 custom-scrollbar relative">
+                {/* Background Decor */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-100/40 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+                
                 {notification && (
-                  <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 shadow-sm animate-fade-in ${
+                  <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 shadow-lg animate-fade-in ${
                     notification.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
                   }`}>
-                    {notification.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
-                    <p>{notification.message}</p>
+                    {notification.type === 'error' ? <AlertCircle size={22} /> : <CheckCircle2 size={22} />}
+                    <p className="font-medium">{notification.message}</p>
                   </div>
                 )}
 
-                <div className="pb-20">
-                  {/* เปลี่ยนวิธีเรียกคอมโพเนนต์ด้านล่างเพื่อแก้ปัญหาช่องกรอกข้อมูลเด้งหลุดโฟกัส */}
+                <div className="pb-10 max-w-7xl mx-auto h-full">
                   {activeMenu === 'instructions' && RenderInstructions()}
                   {activeMenu === 'record' && RenderRecordForm()}
                   {activeMenu === 'donor_request' && RenderRecordForm()}
@@ -1063,98 +1204,108 @@
                   {activeMenu === 'donor_history' && RenderList()}
                   
                   {activeMenu === 'report' && (
-                    <div className="space-y-6">
-                      <h2 className="text-xl font-bold text-[#1e3b6d] flex items-center gap-2"><BarChart3 /> รายงานสรุปยอดเงินบริจาค</h2>
+                    <div className="space-y-6 animate-fade-in">
+                      <h2 className="text-2xl font-heading font-bold text-brand-900 flex items-center gap-3">
+                        <div className="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center"><BarChart3 size={24}/></div> 
+                        รายงานสรุปยอดเงินบริจาค
+                      </h2>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center justify-center text-center">
-                          <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4"><CheckCircle2 size={24} /></div>
-                          <p className="text-slate-500 font-medium">รายการที่อนุมัติแล้ว</p>
-                          <p className="text-3xl font-bold text-[#1e3b6d] mt-2">{donations.filter(d => d.status === 'approved').length} <span className="text-lg font-normal">รายการ</span></p>
+                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+                          <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
+                          <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"><CheckCircle2 size={28} /></div>
+                          <p className="text-slate-500 font-heading font-medium text-sm">รายการที่อนุมัติแล้ว</p>
+                          <p className="text-4xl font-bold text-slate-800 mt-2">{donations.filter(d => d.status === 'approved').length} <span className="text-base font-normal text-slate-400">รายการ</span></p>
                         </div>
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center justify-center text-center border-b-4 border-b-emerald-500">
-                          <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4"><PieChart size={24} /></div>
-                          <p className="text-slate-500 font-medium">ยอดเงินสดรวมที่อนุมัติ</p>
-                          <p className="text-3xl font-bold text-emerald-600 mt-2">{donations.filter(d => d.status === 'approved').reduce((sum, d) => sum + (d.cashAmount || 0), 0).toLocaleString()} <span className="text-lg font-normal">บาท</span></p>
+                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+                          <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                          <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"><PieChart size={28} /></div>
+                          <p className="text-slate-500 font-heading font-medium text-sm">ยอดเงินสดรวมที่อนุมัติ</p>
+                          <p className="text-4xl font-bold text-emerald-600 mt-2">{donations.filter(d => d.status === 'approved').reduce((sum, d) => sum + (d.cashAmount || 0), 0).toLocaleString()} <span className="text-base font-normal text-slate-400">บาท</span></p>
                         </div>
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col items-center justify-center text-center border-b-4 border-b-amber-500">
-                          <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4"><FileText size={24} /></div>
-                          <p className="text-slate-500 font-medium">ยอดมูลค่าทรัพย์สินรวม</p>
-                          <p className="text-3xl font-bold text-amber-600 mt-2">{donations.filter(d => d.status === 'approved').reduce((sum, d) => sum + (d.assetValue || 0), 0).toLocaleString()} <span className="text-lg font-normal">บาท</span></p>
+                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:shadow-md transition-shadow">
+                          <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+                          <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"><FileText size={28} /></div>
+                          <p className="text-slate-500 font-heading font-medium text-sm">ยอดมูลค่าทรัพย์สินรวม</p>
+                          <p className="text-4xl font-bold text-amber-600 mt-2">{donations.filter(d => d.status === 'approved').reduce((sum, d) => sum + (d.assetValue || 0), 0).toLocaleString()} <span className="text-base font-normal text-slate-400">บาท</span></p>
                         </div>
                       </div>
                     </div>
                   )}
                   
                   {activeMenu === 'manageUsers' && (
-                    <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                      <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <h2 className="text-lg font-bold text-[#1e3b6d] flex items-center gap-2"><Users /> จัดการผู้ใช้งานระบบ</h2>
-                        <button onClick={() => setShowAddUserForm(!showAddUserForm)} className="bg-[#1e3b6d] text-white px-3 py-1.5 rounded text-sm hover:bg-[#152a4e] flex items-center gap-1 shadow-sm">
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in">
+                      <div className="p-5 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h2 className="text-xl font-heading font-bold text-brand-900 flex items-center gap-3">
+                           <div className="w-8 h-8 bg-brand-50 text-brand-600 rounded-lg flex items-center justify-center"><Users size={18}/></div>
+                           จัดการผู้ใช้งานระบบ
+                        </h2>
+                        <button onClick={() => setShowAddUserForm(!showAddUserForm)} className={`text-white px-4 py-2 rounded-xl text-sm font-heading font-medium flex items-center gap-2 shadow-sm transition-all ${showAddUserForm ? 'bg-slate-500 hover:bg-slate-600' : 'bg-brand-900 hover:bg-brand-800'}`}>
                           {showAddUserForm ? <X size={16} /> : <UserPlus size={16} />} 
-                          {showAddUserForm ? 'ยกเลิก' : 'เพิ่มผู้ใช้งาน'}
+                          {showAddUserForm ? 'ยกเลิกการเพิ่ม' : 'เพิ่มผู้ใช้งานใหม่'}
                         </button>
                       </div>
 
                       {showAddUserForm && (
-                        <div className="p-6 border-b border-slate-200 bg-sky-50/50">
-                          <form onSubmit={handleAddUserSubmit} className="max-w-3xl space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                          <form onSubmit={handleAddUserSubmit} className="max-w-4xl bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+                            <h3 className="font-heading font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">ฟอร์มเพิ่มผู้ใช้งาน</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล / ตำแหน่ง</label>
-                                <input type="text" required value={newUserForm.name} onChange={(e) => setNewUserForm({...newUserForm, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-sky-500 outline-none" />
+                                <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">ชื่อ-นามสกุล / ตำแหน่ง</label>
+                                <input type="text" required value={newUserForm.name} onChange={(e) => setNewUserForm({...newUserForm, name: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all" />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">เลขประจำตัว 13 หลัก (ถ้ามี)</label>
-                                <input type="text" maxLength="13" value={newUserForm.taxId} onChange={(e) => setNewUserForm({...newUserForm, taxId: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-sky-500 outline-none" placeholder="ไม่ต้องกรอกก็ได้ถ้าเป็นแอดมิน" />
+                                <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">เลขประจำตัว 13 หลัก <span className="text-slate-400 font-normal">(ถ้ามี)</span></label>
+                                <input type="text" maxLength="13" value={newUserForm.taxId} onChange={(e) => setNewUserForm({...newUserForm, taxId: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all font-mono" placeholder="ไม่ต้องกรอกก็ได้ถ้าเป็นแอดมิน" />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
-                                <input type="text" required value={newUserForm.username} onChange={(e) => setNewUserForm({...newUserForm, username: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-sky-500 outline-none" />
+                                <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">ชื่อผู้ใช้งาน (Username)</label>
+                                <input type="text" required value={newUserForm.username} onChange={(e) => setNewUserForm({...newUserForm, username: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all" />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน (Password)</label>
-                                <input type="password" required value={newUserForm.password} onChange={(e) => setNewUserForm({...newUserForm, password: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-sky-500 outline-none" />
+                                <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">รหัสผ่าน (Password)</label>
+                                <input type="password" required value={newUserForm.password} onChange={(e) => setNewUserForm({...newUserForm, password: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all" />
                               </div>
                               <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 mb-1">สิทธิ์การใช้งาน</label>
-                                <select value={newUserForm.role} onChange={(e) => setNewUserForm({...newUserForm, role: e.target.value})} className="w-full md:w-1/2 px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-sky-500 outline-none">
+                                <label className="block text-sm font-heading font-medium text-slate-700 mb-1 ml-1">สิทธิ์การใช้งาน</label>
+                                <select value={newUserForm.role} onChange={(e) => setNewUserForm({...newUserForm, role: e.target.value})} className="w-full md:w-1/2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none transition-all">
                                   <option value="admin">เจ้าหน้าที่ (Admin)</option>
                                   <option value="donor">ผู้บริจาค (Donor)</option>
                                 </select>
                               </div>
                             </div>
-                            <div className="pt-2">
-                              <button type="submit" className="bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700 transition shadow-sm">บันทึกผู้ใช้งาน</button>
+                            <div className="pt-4 flex justify-end">
+                              <button type="submit" className="bg-emerald-600 text-white px-8 py-2.5 rounded-xl font-heading font-medium hover:bg-emerald-700 transition shadow-sm hover:shadow-md hover:-translate-y-0.5">บันทึกผู้ใช้งาน</button>
                             </div>
                           </form>
                         </div>
                       )}
 
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto custom-scrollbar">
                         <table className="w-full text-left text-sm whitespace-nowrap">
-                          <thead className="bg-[#b3d4fc] text-slate-800 border-b border-slate-300">
+                          <thead className="bg-slate-50 text-slate-600 font-heading border-y border-slate-200">
                             <tr>
-                              <th className="px-4 py-3 border-r border-slate-300">ชื่อ-นามสกุล</th>
-                              <th className="px-4 py-3 border-r border-slate-300">ชื่อผู้ใช้งาน</th>
-                              <th className="px-4 py-3 border-r border-slate-300">บทบาท</th>
-                              <th className="px-4 py-3 border-r border-slate-300 text-center">เลขประจำตัว 13 หลัก</th>
-                              <th className="px-4 py-3 text-center">จัดการ</th>
+                              <th className="px-5 py-4 font-semibold w-1/4">ชื่อ-นามสกุล</th>
+                              <th className="px-5 py-4 font-semibold border-l border-slate-200">ชื่อผู้ใช้งาน</th>
+                              <th className="px-5 py-4 font-semibold border-l border-slate-200">บทบาท</th>
+                              <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">เลขประจำตัว 13 หลัก</th>
+                              <th className="px-5 py-4 font-semibold text-center border-l border-slate-200">จัดการ</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-200">
+                          <tbody className="divide-y divide-slate-100">
                             {users.map((u) => (
-                              <tr key={u.id} className="hover:bg-slate-50">
-                                <td className="px-4 py-3 border-r border-slate-200 font-medium text-slate-800">{u.name}</td>
-                                <td className="px-4 py-3 border-r border-slate-200 text-slate-500">{u.username}</td>
-                                <td className="px-4 py-3 border-r border-slate-200">
+                              <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="px-5 py-3 font-medium text-slate-800">{u.name}</td>
+                                <td className="px-5 py-3 text-slate-500">{u.username}</td>
+                                <td className="px-5 py-3">
                                   {u.role === 'admin' 
-                                    ? <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium">เจ้าหน้าที่ (Admin)</span>
-                                    : <span className="bg-sky-100 text-sky-700 px-2 py-1 rounded text-xs font-medium">ผู้บริจาค (Donor)</span>
+                                    ? <span className="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md text-[12px] font-heading font-medium border border-purple-200">เจ้าหน้าที่ (Admin)</span>
+                                    : <span className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md text-[12px] font-heading font-medium border border-blue-200">ผู้บริจาค (Donor)</span>
                                   }
                                 </td>
-                                <td className="px-4 py-3 border-r border-slate-200 text-center font-mono text-slate-600">{u.taxId || '-'}</td>
-                                <td className="px-4 py-3 text-center">
-                                  <button onClick={() => showNotification(`ระงับการใช้งาน ${u.name} แล้ว`, 'error')} className="text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded text-xs border border-red-200">ระงับผู้ใช้</button>
+                                <td className="px-5 py-3 text-center font-mono text-slate-500 tracking-wider text-[13px]">{u.taxId || '-'}</td>
+                                <td className="px-5 py-3 text-center">
+                                  <button onClick={() => showNotification(`ระงับการใช้งาน ${u.name} แล้ว`, 'error')} className="text-red-500 hover:text-white bg-red-50 hover:bg-red-500 px-3 py-1.5 rounded-lg text-xs font-heading font-medium border border-red-200 transition-colors">ระงับผู้ใช้</button>
                                 </td>
                               </tr>
                             ))}
@@ -1167,7 +1318,8 @@
               </main>
             </div>
 
-            {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-10 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
+            {/* Overlay for Mobile Sidebar */}
+            {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 md:hidden animate-fade-in" onClick={() => setIsSidebarOpen(false)}></div>}
           </div>
         );
       }
