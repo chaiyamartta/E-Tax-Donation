@@ -179,7 +179,7 @@
         const [users, setUsers] = useState([]);
         const [donations, setDonations] = useState([]);
 
-        // ================= 초기化 Firebase & Fetch Data =================
+        // ================= 초기화 Firebase & Fetch Data =================
         useEffect(() => {
           // 1. ตรวจสอบสิทธิ์ Firebase โดยใช้ Token ของระบบ (ถ้ามี) หรือ Anonymous Auth
           const initAuth = async () => {
@@ -374,6 +374,7 @@
             cashAmount: cash, 
             assetValue: asset, 
             status,
+            printCount: 0, // กำหนดค่าเริ่มต้นการพิมพ์
             createdAt: Date.now()
           };
           
@@ -401,7 +402,7 @@
           
           try {
             const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'donations', id);
-            await updateDoc(docRef, { status: 'approved', receiptNo: receiptNoInput.trim() });
+            await updateDoc(docRef, { status: 'approved', receiptNo: receiptNoInput.trim(), printCount: 0 });
             showNotification(`อนุมัติและอัปเดตเลขที่ใบเสร็จ "${receiptNoInput}" สำเร็จ`);
             setApproveInputId(null);
             setReceiptNoInput('');
@@ -461,8 +462,20 @@
           return result;
         };
 
-        const handleDownloadReceipt = (donation) => {
+        const handleDownloadReceipt = async (donation) => {
           const printWindow = window.open('', '_blank');
+          
+          // ตรวจสอบและอัปเดตสถานะการพิมพ์ (ต้นฉบับ/สำเนา)
+          const isCopy = donation.printCount && donation.printCount > 0;
+          const printStatusText = isCopy ? 'สำเนา' : 'ต้นฉบับ';
+
+          // ทำการอัปเดตจำนวนการพิมพ์ใน Firebase
+          try {
+            const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'donations', donation.id);
+            await updateDoc(docRef, { printCount: (donation.printCount || 0) + 1 });
+          } catch (error) {
+            console.error("Error updating print count", error);
+          }
           
           // เตรียมข้อมูลสำหรับแสดงผล
           const donorName = donation.donorType === 'individual' 
@@ -505,7 +518,10 @@
                   
                   /* Sub headers */
                   .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 15px; color: #333; align-items: flex-end; }
-                  .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 25px; }
+                  .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 15px; }
+                  
+                  /* Original/Copy Label */
+                  .print-status { text-align: right; font-size: 18px; font-weight: 700; color: #433385; margin-bottom: 15px; }
                   
                   /* Main Grid Content */
                   .content-grid { display: grid; grid-template-columns: 200px 1fr; row-gap: 25px; margin-bottom: 60px; }
@@ -561,6 +577,11 @@
                   </div>
                   
                   <div class="divider"></div>
+                  
+                  <!-- แสดงสถานะการพิมพ์ ต้นฉบับ/สำเนา ใต้เส้น -->
+                  <div class="print-status">
+                    ${printStatusText}
+                  </div>
                   
                   <div class="content-grid">
                     <div class="label">ผู้บริจาค</div>
