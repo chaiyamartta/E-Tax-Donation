@@ -475,8 +475,7 @@
           const bahtText = getThaiBahtText(totalAmount);
           const receiptNo = donation.receiptNo || '-';
           
-          // URLs สำหรับสร้าง QR Code และ Barcode จาก API ภายนอก (ฟรี)
-          const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(receiptNo)}`;
+          // URLs สำหรับสร้าง Barcode จาก API ภายนอก (ฟรี)
           const barcodeUrl = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encodeURIComponent(receiptNo)}&scale=3&height=10&includetext=false`;
 
           printWindow.document.write(`
@@ -553,12 +552,9 @@
                       <div style="font-size: 16px; color: #333; margin-top: 25px;">ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
                     </div>
                     
-                    <!-- ส่วนหัวฝั่งขวา (ใบรับเงิน, QR Code, เลขที่, Barcode) -->
+                    <!-- ส่วนหัวฝั่งขวา (ใบรับเงิน, เลขที่, Barcode) -->
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                      <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 10px;">
-                        <div class="receipt-title" style="margin-bottom: 0; padding-top: 5px;">ใบรับเงินบริจาค</div>
-                        ${receiptNo !== '-' ? `<img src="${qrCodeUrl}" alt="QR Code" style="width: 70px; height: 70px; border: 1px solid #ddd; padding: 2px;" />` : ''}
-                      </div>
+                      <div class="receipt-title" style="margin-bottom: 10px;">ใบรับเงินบริจาค</div>
                       <div style="font-size: 16px; color: #333; margin-bottom: 8px;"><strong>เลขที่</strong> ${receiptNo}</div>
                       ${receiptNo !== '-' ? `<img src="${barcodeUrl}" alt="Barcode" style="height: 35px; max-width: 250px; object-fit: contain;" />` : ''}
                     </div>
@@ -618,7 +614,7 @@
                   </div>
                 </div>
                 <script>
-                  // หน่วงเวลาเล็กน้อยเพื่อให้เบราว์เซอร์ดาวน์โหลดภาพ QR/Barcode เสร็จก่อนสั่งพิมพ์
+                  // หน่วงเวลาเล็กน้อยเพื่อให้เบราว์เซอร์ดาวน์โหลดภาพ Barcode เสร็จก่อนสั่งพิมพ์
                   window.onload = function() {
                     setTimeout(function() {
                       window.print();
