@@ -252,7 +252,7 @@
 
         const initialFormState = {
           date: new Date().toISOString().split('T')[0], isAnonymous: false, donorType: 'individual',
-          taxId: '', prefix: '', firstName: '', lastName: '', corpName: '', cashAmount: '', assetName: '', assetValue: '', note: ''
+          taxId: '', prefix: '', firstName: '', lastName: '', corpName: '', cashAmount: '', assetName: '', assetValue: '', note: '', receiptNo: ''
         };
         const [formData, setFormData] = useState(initialFormState);
         const [authForm, setAuthForm] = useState({ username: '', password: '', name: '', taxId: '' });
@@ -327,7 +327,7 @@
           if (user) {
             setCurrentUser(user);
             setActiveMenu(user.role === 'admin' ? 'list' : 'instructions');
-            showNotification(`ยินดีต้อนรับคุณ ${user.name}`);
+            showNotification(`ยินดีต้อนรับคุณ ${user.name}`, 'success');
             setAuthForm({ username: '', password: '', name: '', taxId: '' });
           } else {
             showNotification('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง', 'error');
@@ -356,7 +356,7 @@
           try {
             await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'users'), newUser);
             setAuthMode('login');
-            showNotification('สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ');
+            showNotification('สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ', 'success');
           } catch (err) {
             showNotification('เกิดข้อผิดพลาดในการสมัครสมาชิก', 'error');
           }
@@ -384,7 +384,11 @@
             showNotification('ต้องระบุจำนวนเงินสดหรือมูลค่าทรัพย์สินอย่างน้อย 1 รายการ', 'error'); return;
           }
 
-          const status = currentUser.role === 'admin' ? 'approved' : 'pending';
+          // ปรับปรุง Logic สำหรับ Admin: ถ้ามีเลขใบเสร็จให้อนุมัติเลย ถ้าไม่มีให้ตั้งเป็น Pending
+          let status = 'pending';
+          if (currentUser.role === 'admin' && formData.receiptNo && formData.receiptNo.trim() !== '') {
+            status = 'approved';
+          }
 
           const newDonation = { 
             ...formData, 
@@ -393,6 +397,7 @@
             lastName: actualLastName,
             cashAmount: cash, 
             assetValue: asset, 
+            receiptNo: formData.receiptNo ? formData.receiptNo.trim() : '',
             status,
             printCount: 0, // กำหนดค่าเริ่มต้นการพิมพ์
             createdAt: Date.now()
@@ -403,10 +408,10 @@
             setFormData(initialFormState);
             
             if (currentUser.role === 'admin') {
-              showNotification('บันทึกข้อมูลการบริจาคลงระบบสำเร็จ');
+              showNotification(status === 'approved' ? 'บันทึกและอนุมัติสำเร็จ' : 'บันทึกสำเร็จ (รอตรวจสอบการออกใบเสร็จ)', 'success');
               setActiveMenu('list');
             } else {
-              showNotification('ส่งรายการแจ้งบริจาคเรียบร้อย รอเจ้าหน้าที่ตรวจสอบ');
+              showNotification('ส่งรายการแจ้งบริจาคเรียบร้อย รอเจ้าหน้าที่ตรวจสอบ', 'success');
               setActiveMenu('donor_history');
             }
           } catch (error) {
@@ -423,7 +428,7 @@
           try {
             const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'donations', id);
             await updateDoc(docRef, { status: 'approved', receiptNo: receiptNoInput.trim(), printCount: 0 });
-            showNotification(`อนุมัติและอัปเดตเลขที่ใบเสร็จ "${receiptNoInput}" สำเร็จ`);
+            showNotification(`อนุมัติและอัปเดตเลขที่ใบเสร็จ "${receiptNoInput}" สำเร็จ`, 'success');
             setApproveInputId(null);
             setReceiptNoInput('');
           } catch (error) {
@@ -739,7 +744,7 @@
             await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'users'), newUser);
             setShowAddUserForm(false);
             setNewUserForm({ name: '', username: '', password: '', role: 'admin', taxId: '' });
-            showNotification('เพิ่มผู้ใช้งานลงฐานข้อมูลสำเร็จ');
+            showNotification('เพิ่มผู้ใช้งานลงฐานข้อมูลสำเร็จ', 'success');
           } catch (error) {
             showNotification('เกิดข้อผิดพลาดในการเพิ่มผู้ใช้', 'error');
           }
@@ -982,6 +987,16 @@
                       </div>
                     </div>
                   )}
+
+                  {!isDonor && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 pt-4 border-t border-slate-100 mt-4">
+                      <label className="sm:w-1/3 text-sm font-heading font-medium text-slate-700 sm:text-right">เลขที่ใบเสร็จ e-Donation :</label>
+                      <div className="sm:w-2/3">
+                        <input type="text" name="receiptNo" value={formData.receiptNo || ''} onChange={handleInputChange} 
+                          className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 outline-none w-full font-mono transition-all text-slate-700" placeholder="เว้นว่างไว้เพื่อรออนุมัติทีหลังได้" />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Section: ข้อมูลผู้บริจาค */}
@@ -1137,14 +1152,14 @@
                           )}
                         </td>
                         {!isDonor && (
-                          <td className="px-5 py-3 text-center flex justify-center gap-2 items-center">
-                            {d.status === 'pending' && approveInputId !== d.id && (
-                              <button onClick={() => { setApproveInputId(d.id); setReceiptNoInput(''); }} className="text-green-700 hover:text-white bg-green-50 hover:bg-green-600 p-1.5 rounded-lg border border-green-200 transition-colors tooltip" title="อนุมัติรายการ">
+                          <td className="px-5 py-3 text-center flex justify-center gap-2 items-center relative">
+                            {(d.status === 'pending' || (d.status === 'approved' && !d.receiptNo)) && approveInputId !== d.id && (
+                              <button onClick={() => { setApproveInputId(d.id); setReceiptNoInput(d.receiptNo || ''); }} className="text-green-700 hover:text-white bg-green-50 hover:bg-green-600 p-1.5 rounded-lg border border-green-200 transition-colors tooltip" title={d.status === 'pending' ? 'อนุมัติรายการ' : 'เพิ่มเลขใบเสร็จ'}>
                                 <CheckCircle2 size={18} />
                               </button>
                             )}
                             {approveInputId === d.id && (
-                              <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                              <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm absolute right-10 z-20">
                                 <input type="text" value={receiptNoInput} onChange={(e) => setReceiptNoInput(e.target.value)} placeholder="เลขที่ใบเสร็จ e-Donation" className="text-xs px-2 py-1.5 border border-slate-200 rounded-md w-36 outline-none focus:ring-1 focus:ring-brand-500 font-mono" autoFocus />
                                 <button onClick={() => confirmApprove(d.id)} className="bg-green-600 text-white px-2 py-1.5 rounded-md text-xs hover:bg-green-700 font-heading">บันทึก</button>
                                 <button onClick={() => setApproveInputId(null)} className="bg-slate-200 text-slate-600 px-2 py-1.5 rounded-md text-xs hover:bg-slate-300 font-heading">ยกเลิก</button>
