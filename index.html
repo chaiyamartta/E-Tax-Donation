@@ -560,14 +560,14 @@
                 <style>
                   @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
                   
-                  /* การตั้งค่าหน้ากระดาษ A5 แนวนอน (Landscape) */
+                  /* การตั้งค่าหน้ากระดาษ A4 แนวนอน (Landscape) พอดี 1 หน้า */
                   @page {
-                    size: A5 landscape;
-                    margin: 10mm;
+                    size: A4 landscape;
+                    margin: 15mm;
                   }
 
-                  body { font-family: 'Sarabun', sans-serif; padding: 20px; color: #1a1a1a; line-height: 1.4; background-color: #fff; margin: 0; }
-                  .receipt-container { max-width: 100%; margin: 0; position: relative; z-index: 1; padding: 0; }
+                  body { font-family: 'Sarabun', sans-serif; padding: 20px; color: #1a1a1a; line-height: 1.5; background-color: #fff; margin: 0; }
+                  .receipt-container { max-width: 1050px; margin: 0 auto; position: relative; z-index: 1; padding: 10px 20px; }
                   
                   /* Watermark styling */
                   .watermark {
@@ -575,7 +575,7 @@
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    width: 350px;
+                    width: 500px;
                     opacity: 0.08;
                     z-index: -1;
                     pointer-events: none;
@@ -583,22 +583,22 @@
                   
                   /* Header & Logos */
                   .header-row-1 { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
-                  .receipt-title { font-size: 28px; font-weight: 700; color: #2e377d; margin-bottom: 6px; }
+                  .receipt-title { font-size: 34px; font-weight: 700; color: #2e377d; margin-bottom: 8px; }
                   
                   /* Sub headers */
-                  .header-row-2 { display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 10px; color: #333; align-items: flex-end; }
-                  .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 15px; }
+                  .header-row-2 { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 15px; color: #333; align-items: flex-end; }
+                  .divider { height: 1.5px; background-color: #d1d5db; margin-bottom: 30px; }
                   
                   /* Stamp Styling */
                   .stamp {
                     position: absolute;
-                    top: 130px; /* ปรับให้อยู่ใต้เส้น divider มุมขวาพอดี */
-                    right: 20px;
-                    font-size: 20px;
+                    top: 160px; /* ปรับให้อยู่ใต้เส้น divider มุมขวา */
+                    right: 30px;
+                    font-size: 26px;
                     font-weight: 700;
-                    padding: 4px 16px;
-                    border: 3px solid;
-                    border-radius: 6px;
+                    padding: 8px 24px;
+                    border: 4px solid;
+                    border-radius: 8px;
                     transform: rotate(-10deg);
                     opacity: 0.7;
                     pointer-events: none;
@@ -608,26 +608,26 @@
                   .stamp-original { color: #2e377d; border-color: #2e377d; }
                   .stamp-copy { color: #dc2626; border-color: #dc2626; }
                   
-                  /* Main Grid Content - ปรับลดช่องว่างเพื่อไม่ให้ล้นหน้า A5 */
-                  .content-grid { display: grid; grid-template-columns: 180px 1fr; row-gap: 12px; margin-bottom: 30px; }
-                  .label { font-size: 18px; font-weight: 700; color: #000; padding-top: 2px; text-align: left; }
+                  /* Main Grid Content - ขยายช่องว่างให้พอดี A4 */
+                  .content-grid { display: grid; grid-template-columns: 220px 1fr; row-gap: 20px; margin-bottom: 45px; }
+                  .label { font-size: 22px; font-weight: 700; color: #000; padding-top: 2px; text-align: left; }
                   .details { display: flex; flex-direction: column; }
-                  .val-title { font-size: 18px; font-weight: 700; color: #000; }
-                  .val-sub { font-size: 15px; font-weight: 400; color: #000; margin-top: 4px; }
+                  .val-title { font-size: 22px; font-weight: 700; color: #000; }
+                  .val-sub { font-size: 16px; font-weight: 400; color: #000; margin-top: 6px; }
                   .val-sub strong { font-weight: 700; }
                   
                   /* Signatures Footer */
-                  .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; margin-top: 30px; align-items: end; }
-                  .sig-left { text-align: left; font-size: 12px; color: #333; }
+                  .signatures { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; margin-top: 70px; align-items: end; }
+                  .sig-left { text-align: left; font-size: 13px; color: #333; }
                   .sig-center { text-align: center; }
-                  .sig-name { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 4px; }
-                  .sig-role { font-size: 16px; font-weight: 700; color: #000; }
+                  .sig-name { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 5px; }
+                  .sig-role { font-size: 18px; font-weight: 700; color: #000; }
                   .sig-right { text-align: right; }
-                  .sig-date-title { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 4px; }
-                  .sig-print-date { font-size: 14px; font-weight: 700; color: #000; }
+                  .sig-date-title { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 5px; }
+                  .sig-print-date { font-size: 16px; font-weight: 700; color: #000; }
                   
                   /* Notes */
-                  .notes { margin-top: 20px; font-size: 11px; color: #333; line-height: 1.5; }
+                  .notes { margin-top: 30px; font-size: 13px; color: #333; line-height: 1.6; }
                   .notes-flex { display: flex; }
                   .notes-label { white-space: nowrap; margin-right: 5px; }
                   
@@ -652,15 +652,15 @@
                   <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                     <!-- โลโก้และข้อความฝั่งซ้าย -->
                     <div style="display: flex; flex-direction: column; justify-content: space-between;">
-                      <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 70px; object-fit: contain; object-position: left top;" />
-                      <div style="font-size: 15px; color: #333; margin-top: 15px;">ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
+                      <img src="https://img5.pic.in.th/file/secure-sv1/Gemini_Generated_Image_fovzwgfovzwgfovz.png" alt="โลโก้วัดไชยามาตย์" style="max-height: 80px; object-fit: contain; object-position: left top;" />
+                      <div style="font-size: 16px; color: #333; margin-top: 15px;">ระบบบริจาคอิเล็กทรอนิกส์ (e-Donation) กรมสรรพากร</div>
                     </div>
                     
                     <!-- ส่วนหัวฝั่งขวา (ใบรับเงิน, เลขที่, Barcode) -->
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
                       <div class="receipt-title">ใบรับเงินบริจาค</div>
-                      <div style="font-size: 15px; color: #333; margin-bottom: 6px;"><strong>เลขที่</strong> ${receiptNo}</div>
-                      ${receiptNo !== '-' ? `<img src="${barcodeUrl}" alt="Barcode" style="height: 30px; max-width: 220px; object-fit: contain;" />` : ''}
+                      <div style="font-size: 16px; color: #333; margin-bottom: 6px;"><strong>เลขที่</strong> ${receiptNo}</div>
+                      ${receiptNo !== '-' ? `<img src="${barcodeUrl}" alt="Barcode" style="height: 38px; max-width: 280px; object-fit: contain;" />` : ''}
                     </div>
                   </div>
                   
